@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Macfil CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f3f4;--card:#fff;--ink:#17232d;--mut:#5b6b78;--line:#d6dde2;--acc:#1f5f8b;--warn:#c4571a;--ok:#2f7d4f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181e;--card:#18232b;--ink:#e6edf1;--mut:#93a4b1;--line:#2b3a45;--acc:#6fb1de;--warn:#f08a50;--ok:#6cc08b}}
+:root[data-theme="dark"]{--bg:#10181e;--card:#18232b;--ink:#e6edf1;--mut:#93a4b1;--line:#2b3a45;--acc:#6fb1de;--warn:#f08a50;--ok:#6cc08b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.4 Barlow,system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:14px 16px 6px;flex-wrap:wrap}
+header b{font-size:22px;font-weight:700;letter-spacing:.2px}header span{color:var(--mut);font-size:14px}
+nav{display:flex;gap:4px;overflow-x:auto;padding:0 12px;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:2}
+nav button{border:0;background:none;color:var(--mut);font:600 15px Barlow,system-ui,sans-serif;padding:12px 12px;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer}
+nav button.on{color:var(--ink);border-color:var(--acc)}
+main{padding:14px 12px 96px;max-width:900px;margin:auto}
+.kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:600px){.kpi{grid-template-columns:repeat(4,1fr)}}
+.kpi div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.kpi b{display:block;font-size:24px;font-weight:700}.kpi small{color:var(--mut)}
+.row{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--acc);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:grid;gap:2px}
+.row.late{border-left-color:var(--warn)}.row.win{border-left-color:var(--ok)}
+.row b{font-weight:600;word-break:break-all}.row small,.row em{color:var(--mut);font-style:normal;font-size:14px}
+.row .l{display:flex;justify-content:space-between;gap:8px}
+h2{font-size:17px;margin:18px 0 8px;display:flex;justify-content:space-between}h2 small{color:var(--mut);font-weight:400}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px;width:100%}
+textarea{min-height:64px}
+.seg{display:flex;gap:6px;margin-bottom:10px}.seg button{flex:1;padding:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:600 14px Barlow,system-ui,sans-serif}
+.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--acc);color:#fff;border:0;border-radius:28px;padding:14px 22px;font:700 16px Barlow,system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}
+.empty{text-align:center;color:var(--mut);padding:40px 16px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:5}
+#modal[hidden]{display:none}
+#modal form{background:var(--bg);width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+@media(min-width:600px){#modal{align-items:center}#modal form{border-radius:14px}}
+#modal h3{margin:0 0 10px}label{display:block;font-size:14px;color:var(--mut);margin-bottom:10px}label>*{margin-top:4px;color:var(--ink)}
+.btns{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}.btns button{padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 15px Barlow,system-ui,sans-serif;cursor:pointer}
+.btns .pri{background:var(--acc);border-color:var(--acc);color:#fff}.btns .danger{color:var(--warn);margin-right:auto}
+.res button{display:block;width:100%;text-align:left;padding:9px;margin-top:4px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+
+body{display:block}#app{display:flex;min-height:100vh}
+aside{width:208px;flex:none;background:#1e2d3d;color:#cfd8e0;display:flex;flex-direction:column;padding:14px 8px;position:sticky;top:0;height:100vh}
+aside .logo{font:700 22px Barlow,system-ui,sans-serif;color:#fff;padding:4px 10px 16px}
+aside button{display:flex;gap:10px;align-items:center;background:none;border:0;border-left:3px solid transparent;color:inherit;font:600 15px Barlow,system-ui,sans-serif;padding:11px 10px;border-radius:6px;cursor:pointer;text-align:left}
+aside button:hover{background:#2a3c4f}aside button.on{background:#2a3c4f;color:#fff;border-left-color:#ff7a59}
+aside i{font-style:normal;width:18px;text-align:center}
+aside .me{margin-top:auto;padding:10px;font-size:14px;color:#fff}aside .me small{display:block;color:#9fb0bf}
+.shell{flex:1;min-width:0}
+.top{display:flex;gap:10px;align-items:center;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:3}
+.top h1{font-size:20px;margin:0;flex:none}.top input{max-width:340px;margin-left:auto}
+.cta{background:#ff7a59;color:#2a1208;border:0;border-radius:8px;padding:10px 16px;font:700 15px Barlow,system-ui,sans-serif;cursor:pointer;flex:none}
+main{max-width:none;padding:16px}
+.board{display:flex;gap:10px;overflow-x:auto;align-items:flex-start;padding-bottom:12px}
+.col{flex:none;width:250px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:140px}
+.col.over{outline:2px dashed #ff7a59;background:var(--card)}
+.col h4{margin:2px 4px;display:flex;justify-content:space-between;font-size:14px}.col .tot{font-size:13px;color:var(--mut);margin:0 4px 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px;margin-bottom:8px;cursor:grab;display:grid;gap:3px;font-size:14px}
+.card:active{cursor:grabbing}.card b{font-weight:600}.card span,.card small{color:var(--mut)}.card .od{color:var(--warn);font-weight:600}
+.card .l{display:flex;justify-content:space-between}.mv{display:none;padding:6px;font-size:13px;margin-top:4px}
+@media(pointer:coarse){.mv{display:block}}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.filters>*{flex:1 1 150px;width:auto}
+.tw{overflow-x:auto}.cnt{color:var(--mut);margin:0 0 6px;font-size:14px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);font-size:14px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+th{cursor:pointer;color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--card)}tbody tr{cursor:pointer}tbody tr:hover{background:var(--bg)}
+td.late{color:var(--warn);font-weight:600}
+@media(max-width:799px){#app{display:block;padding-bottom:64px}
+aside{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));z-index:6}
+aside .logo,aside .me{display:none}aside button{flex:1;flex-direction:column;gap:2px;font-size:11px;padding:6px 2px;border-left:0;border-top:3px solid transparent;justify-content:center;align-items:center}
+aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margin-left:auto}.col{width:78vw}}
+.ph{width:72px;height:72px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0}td select,td input{padding:4px 6px;font-size:13px;width:auto;min-width:90px}.lg{max-width:380px;margin:10vh auto;padding:24px;display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;width:calc(100% - 32px)}.lg h1{margin:0 0 4px}.lg a{color:var(--acc);font-size:14px}.so{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;flex:none}.empty a{color:var(--acc)}</style></head>
+<body><div id="app"><p class="empty">Loading…</p></div><div id="modal" hidden></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script>
+const CFG={url:'PASTE_YOUR_SUPABASE_URL_HERE',key:'PASTE_YOUR_SUPABASE_ANON_KEY_HERE'};
+const SB=CFG.url.startsWith('PASTE')?null:supabase.createClient(CFG.url,CFG.key);
+const run=async p=>{const{error}=await p;if(error)throw error};
+const col=n=>({
+  doc:id=>({
+    set:d=>run(SB.from(n).upsert({id,data:d})),
+    update:async d=>{const{data:r,error}=await SB.from(n).select('data').eq('id',id).single();if(error)throw error;return run(SB.from(n).update({data:{...r.data,...d}}).eq('id',id))},
+    delete:()=>run(SB.from(n).delete().eq('id',id)),
+    get:async()=>{const{data}=await SB.from(n).select('id').eq('id',id).maybeSingle();return{exists:!!data}}
+  }),
+  onSnapshot:cb=>{const load=async()=>{const{data,error}=await SB.from(n).select('id,data');if(!error)cb({docs:data.map(r=>({id:r.id,data:()=>r.data}))})};load();SB.channel('ch-'+n).on('postgres_changes',{event:'*',schema:'public',table:n},load).subscribe()}
+});
+const $=s=>document.querySelector(s);
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ST=['New enquiry','Technical and sourcing','Pricing and approval','Quoted','Revision and negotiation','Won (PO received)'];
+const OC=['Open','Lost','Declined','Cancelled'];
+const ORD=['','Order placed','Delivered','Invoiced','Paid'];
+const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales / AE'};
+const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{stage:'',outcome:'',owner:'',product:''},sort:{k:'seq',d:-1}};
+let DB,U,UID;
+const today=()=>new Date().toISOString().slice(0,10);
+const my=()=>S.staff[UID];
+const seeAll=()=>['manager','finance','support'].includes(my().role);
+const canEdit=()=>my().role!=='finance';
+const isAdmin=()=>my().admin===true;
+const mine=q=>q.sales===my().ini||q.ae===my().ini;
+const visible=()=>S.quotes.filter(q=>seeAll()||mine(q));
+const fmt=n=>Number(n||0).toLocaleString('en-MY');
+const qno=q=>`MF26-${q.seq}-${q.product||'NA'}-${q.sales||'NA'}-${q.ae||'NA'}${q.rev>0?'-R'+q.rev:''}`;
+const oc=q=>q.outcome||'Open';
+const win=q=>oc(q)==='Open'&&ST.indexOf(q.stage||ST[0])>=5;
+const pre=q=>oc(q)==='Open'&&ST.indexOf(q.stage||ST[0])<5;
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const vvis=()=>S.visits.filter(v=>seeAll()||v.owner===my().ini);
+const msg=t=>{$('#app').innerHTML=`<p class="empty">${t}</p>`};
+
+async function init(){
+  if(CFG.url.startsWith('PASTE'))return msg('Setup not finished: paste your Supabase URL and key into this file (see the setup guide).');
+  const{data:{session}}=await SB.auth.getSession();
+  if(!session)return login('in');
+  DB={collection:col};UID=session.user.id;
+  DB.collection('staff').onSnapshot(async s=>{
+    S.staff={};s.docs.forEach(d=>S.staff[d.id]=d.data());
+    if(!S.staff[UID]&&false){
+      const m=await U.me();
+      const ini=m.name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+      await DB.collection('staff').doc(UID).set({name:m.name,ini,role:'manager',admin:true,active:true});return}
+    render()});
+  DB.collection('quotes').onSnapshot(s=>{S.quotes=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  DB.collection('customers').onSnapshot(s=>{S.custs=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  DB.collection('visits').onSnapshot(s=>{S.visits=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+}
+
+function qrow(q){
+  const late=oc(q)==='Open'&&q.next&&q.next<today();
+  return `<div class="row ${late?'late':''} ${win(q)?'win':''}" data-e="${q.id}"><div class="l"><b>${E(qno(q))}</b><span>${q.curr||'RM'} ${fmt(q.price)}</span></div><span>${E(q.customer)}</span><small>${E(q.desc)}</small><em>${E(q.stage||ST[0])} · ${oc(q)}${q.next?' · follow up '+q.next:''}${late?' (overdue)':''}${q.approval==='Pending'?' · approval pending ('+E(q.approver||'?')+')':''}</em></div>`}
+
+function fu(){
+  const all=visible().filter(pre),sc=seeAll()&&S.scope==='all';
+  const list=(sc?all:all.filter(mine)).sort((a,b)=>(a.next||'9')<(b.next||'9')?-1:1);
+  const od=all.filter(q=>q.next&&q.next<today()).length;
+  const owed=visible().filter(q=>oc(q)==='Open'&&q.order==='Invoiced');
+  const wk=addDays(7),k=v=>v.status==='Done'?v.next:v.date;
+  const vl=vvis().filter(v=>((v.status==='Planned'&&v.date<=wk)||(v.status==='Done'&&v.next&&v.next<=wk))&&(sc||v.owner===my().ini)).sort((a,b)=>(k(a)||'9')<(k(b)||'9')?-1:1);
+  const sum=l=>fmt(l.reduce((a,q)=>a+(q.price||0),0));
+  return `<div class="kpi"><div><b>${all.length}</b><small>Open quotes</small></div><div><b>${od}</b><small>Overdue follow-ups</small></div><div><b>${sum(all)}</b><small>Pipeline value</small></div><div><b>${sum(owed)}</b><small>Invoiced, to collect</small></div></div>`+
+  (seeAll()?`<div class="seg"><button data-f="mine" class="${S.scope==='mine'?'on':''}">Mine</button><button data-f="all" class="${S.scope==='all'?'on':''}">Everyone</button></div>`:'')+
+  (vl.length?`<h2>Activities due<small>next 7 days</small></h2>${vl.map(vrow).join('')}`:'')+
+  `<h2>Quote follow-ups</h2>`+(list.length?list.map(qrow).join(''):'<p class="empty">No open quotes to follow up. Tap Create to add one.</p>');
+}
+function card(q){
+  return `<div class="card" draggable="${canEdit()}" data-e="${q.id}" data-id="${q.id}"><b>${E(q.customer)}</b><span>${E(q.desc)}</span><div class="l"><em>${q.curr||'RM'} ${fmt(q.price)}</em><small>${E(q.sales||'')}${q.ae?' / '+E(q.ae):''}</small></div>${q.next&&q.next<today()?'<small class="od">Overdue '+q.next+'</small>':''}${canEdit()?`<select class="mv" data-mv="${q.id}">${ST.map(s=>`<option${s===(q.stage||ST[0])?' selected':''}>${E(s)}</option>`).join('')}</select>`:''}</div>`}
+function pl(){
+  const op=visible().filter(q=>oc(q)==='Open');
+  return `<div class="board">${ST.map(s=>{const l=op.filter(q=>(q.stage||ST[0])===s);
+    return `<section class="col" data-stage="${s}"><h4>${s}<small>${l.length}</small></h4><div class="tot">RM ${fmt(l.reduce((a,q)=>a+(q.price||0),0))}</div>${l.map(card).join('')}</section>`}).join('')}</div>`;
+}
+function qt(){
+  const f=S.fl,sel=(k,n,o)=>`<select data-fl="${k}"><option value="">${n}</option>${o.filter(Boolean).map(x=>`<option${x===f[k]?' selected':''}>${E(x)}</option>`).join('')}</select>`;
+  return `<div class="filters"><input id="srch" placeholder="Search customer, description, number" value="${E(S.q)}">${sel('stage','All stages',ST)}${sel('outcome','All outcomes',OC)}${sel('owner','All owners',inis())}${sel('product','All products',[...new Set(visible().map(q=>q.product))].sort())}</div><div class="tw" id="list">${qlist()}</div>`}
+function qlist(){
+  const t=S.q.toLowerCase(),f=S.fl,k=S.sort.k,ce=canEdit(),sel=(id,fl,o,val)=>`<select data-ed="${id}:${fl}">${o.map(x=>`<option${x===val?' selected':''}>${E(x)}</option>`).join('')}</select>`;
+  const l=visible().filter(q=>(!t||(qno(q)+q.customer+q.desc).toLowerCase().includes(t))&&(!f.stage||(q.stage||ST[0])===f.stage)&&(!f.outcome||oc(q)===f.outcome)&&(!f.owner||q.sales===f.owner||q.ae===f.owner)&&(!f.product||q.product===f.product))
+    .sort((a,b)=>{const x=k==='stage'?ST.indexOf(a.stage||ST[0]):(a[k]??''),y=k==='stage'?ST.indexOf(b.stage||ST[0]):(b[k]??'');return(x>y?1:x<y?-1:0)*S.sort.d});
+  const H=[['seq','No.'],['customer','Customer'],['desc','Description'],['price','Value'],['product','Product'],['sales','Sales'],['ae','AE'],['stage','Stage'],['outcome','Outcome'],['order','Order'],['next','Follow-up']];
+  return `<p class="cnt">${l.length} quotes · RM ${fmt(l.reduce((a,q)=>a+(q.price||0),0))}</p><table><thead><tr>${H.map(([c,n])=>`<th data-sort="${c}">${n}${k===c?(S.sort.d>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${l.slice(0,200).map(q=>`<tr data-e="${q.id}"><td>${q.seq}</td><td>${E(q.customer)}</td><td>${E(q.desc)}</td><td>${ce?`<input type="number" data-ed="${q.id}:price" value="${q.price||0}">`:(q.curr||'RM')+' '+fmt(q.price)}</td><td>${E(q.product)}</td><td>${E(q.sales)}</td><td>${E(q.ae)}</td><td>${ce?sel(q.id,'stage',ST,q.stage||ST[0]):E(q.stage||ST[0])}</td><td>${ce?sel(q.id,'outcome',OC,oc(q)):oc(q)}</td><td>${ce?sel(q.id,'order',ORD,q.order||''):E(q.order)}</td><td class="${oc(q)==='Open'&&q.next&&q.next<today()?'late':''}">${ce?`<input type="date" data-ed="${q.id}:next" value="${q.next||''}">`:(q.next||'')}</td></tr>`).join('')}</tbody></table>${l.length>200?'<p class="cnt">Showing first 200. Narrow with filters.</p>':''}`;
+}
+function vrow(v){
+  const late=v.status==='Planned'&&v.date<today(),ph=v.photos||[];
+  return `<div class="row ${late?'late':''} ${v.status==='Done'?'win':''}" data-v="${v.id}"><div class="l"><b>${E(v.type||'Visit')} · ${E(v.customer)}</b><span>${v.date||''} ${E(v.time)}</span></div><span>${E(v.purpose)}</span><em>${E(v.owner)} · ${v.status}${v.quotes?' · quotes '+E(v.quotes):''}${late?' (not reported)':''}${v.status==='Done'&&v.next?' · next '+v.next:''}</em>${v.status==='Done'&&v.outcome?`<small>${E(v.outcome)}</small>`:''}<div>${ph.map(p=>`<img class="ph" src="${CFG.url}/storage/v1/object/public/photos/${p}" alt="Visit photo">`).join('')}</div></div>`}
+function vsc(){
+  const up=S.vs==='up',l=vvis().filter(v=>up?v.status==='Planned':v.status!=='Planned').sort((a,b)=>(a.date<b.date?-1:1)*(up?1:-1));
+  return `<div class="seg"><button data-vs="up" class="${up?'on':''}">Planned</button><button data-vs="done" class="${up?'':'on'}">Done</button></div>`+(l.length?l.map(vrow).join(''):'<p class="empty">Nothing here yet. Tap Create to schedule a visit.</p>');
+}
+function visitForm(v,pre){
+  const d0=v||{type:'Visit',status:'Planned',owner:my().ini,date:today(),...pre};
+  let fm;
+  fm=modal(v?(v.type||'Visit')+': '+v.customer:'New activity',[{k:'type',l:'Type',t:'select',o:['Visit','Call','Meeting','Email','Note']},{k:'customer',l:'Customer',dl:1},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'purpose',l:'Subject or purpose'},{k:'owner',l:'Visit owner',t:'select',o:seeAll()?inis(d0.owner):[my().ini]},{k:'quotes',l:'Related quote numbers (e.g. 1617, 1620)'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']},{k:'attendees',l:'Who attended'},{k:'notes',l:'Discussion notes',t:'area'},{k:'outcome',l:'Outcome',t:'area'},{k:'next',l:'Next action, follow-up date',t:'date'},{k:'photos',l:'Photos'}],d0,async d=>{
+    d.customer=d.customer.trim();if(!d.customer)throw Error('Customer is required.');
+    if(d.status==='Done'&&!d.notes.trim()&&!d.outcome.trim())throw Error('Add notes or an outcome to report the visit.');
+    delete d.photos;const ph=[...(v?.photos||[])],fs=[...fm.photos.files];
+    if(fs.length){for(const f of fs){const p=UID+'/'+Date.now()+'-'+f.name.replace(/[^\w.]/g,'');const{error}=await SB.storage.from('photos').upload(p,f);if(error)throw error;ph.push(p)}}
+    d.photos=ph;await ensureCust(d.customer);
+    const C=DB.collection('visits');
+    if(v)return C.doc(v.id).update(d);
+    return C.doc('v'+Date.now().toString(36)).set({...d,by:UID});
+  },v&&isAdmin()?()=>DB.collection('visits').doc(v.id).delete():null);
+}
+function sheet(h){const el=$('#modal');el.hidden=false;el.innerHTML=`<form onsubmit="return false">${h}<div class="btns"><button type="button" id="x">Close</button></div></form>`;$('#x').onclick=()=>{el.hidden=true}}
+const linked=q=>S.visits.filter(v=>(v.quotes||'').split(/[\s,;]+/).includes(String(q.seq)));
+const chk=x=>x==='Done'?'✓':x==='N/A'?'–':'○';
+function quoteView(q){
+  const acts=linked(q).sort((a,b)=>a.date<b.date?1:-1);
+  sheet(`<h3>${E(qno(q))}</h3><p><b>${E(q.customer)}</b><br>${E(q.desc)}</p><p class="cnt">${q.curr||'RM'} ${fmt(q.price)} · ${E(q.stage||ST[0])} · ${oc(q)}${q.order?' · '+E(q.order):''}${q.next?' · follow up '+q.next:''}</p><p class="cnt">${chk(q.cTech)} Technical review · ${chk(q.cCost)} Cost known · ${chk(q.cMargin)} Margin checked · Approval: ${E(q.approval||'Not needed')}${q.approver?' ('+E(q.approver)+')':''}</p>${canEdit()?`<div class="btns"><button type="button" data-act="eq:${q.id}">Edit quote</button><button type="button" data-act="na:${q.id}">+ Activity</button></div>`:''}<div id="ai" class="cnt" style="white-space:pre-wrap"></div><h2>Timeline<small>${acts.length}</small></h2>${acts.map(vrow).join('')||'<p class="empty">No activities linked yet.</p>'}`)}
+function custView(c){
+  const qs=visible().filter(q=>q.customer===c.name).sort((a,b)=>b.seq-a.seq),as=vvis().filter(v=>v.customer===c.name).sort((a,b)=>a.date<b.date?1:-1);
+  sheet(`<h3>${E(c.name)}</h3><p class="cnt">${E(c.contact)} ${E(c.phone)} ${E(c.email)}</p>${canEdit()?`<div class="btns"><button type="button" data-act="ec:${c.id}">Edit</button><button type="button" data-act="nq:${c.id}">+ Quote</button><button type="button" data-act="nc:${c.id}">+ Activity</button></div>`:''}<div id="ai" class="cnt" style="white-space:pre-wrap"></div><h2>Quotes<small>${qs.length} · RM ${fmt(qs.reduce((a,q)=>a+(q.price||0),0))}</small></h2>${qs.map(qrow).join('')}<h2>Activities<small>${as.length}</small></h2>${as.map(vrow).join('')}`)}
+async function ai(p){const o=$('#ai');o.textContent='Thinking…';try{const A=await claude.use('sample');if(!A){o.textContent='AI is not available for your account.';return}const r=await A(p,{onText:({text})=>{o.textContent=text}});o.textContent=r.text}catch(x){o.textContent='AI could not answer: '+(x.message||x.code||x)}}
+function act(a){
+  const[k,id]=a.split(':'),q=S.quotes.find(x=>x.id===id),c=S.custs.find(x=>x.id===id);
+  if(k==='eq')quoteForm(q);
+  else if(k==='na')visitForm(null,{customer:q.customer,quotes:String(q.seq)});
+  else if(k==='ec')custForm(c);
+  else if(k==='nq')quoteForm(null,c.name);
+  else if(k==='nc')visitForm(null,{customer:c.name});
+  else if(k==='ai')ai(`Summarise these sales activities for quote ${qno(q)} (${q.desc}) with customer ${q.customer} in 4 short bullet points: key points, customer concerns, current status, recommended next step. Plain text, no markdown.\nActivities:\n`+(linked(q).map(v=>`${v.date} ${v.type||'Visit'}: ${v.purpose||''}. Notes: ${v.notes||''}. Outcome: ${v.outcome||''}`).join('\n')||'None logged yet.'));
+  else if(k==='ar')ai(`Write a short pre-visit brief on the company "${c.name}" for a Malaysian supplier of industrial pumps, mixers, motors and repair services: what the company does, likely needs, and 3 questions to ask. Plain text, no markdown. Only state what you are confident about, and say clearly if you do not recognise the company.`);
+}
+function cu(){
+  const l=[...S.custs].sort((a,b)=>a.name.localeCompare(b.name));
+  return l.length?l.map(c=>{const n=visible().filter(q=>q.customer===c.name).length;
+    return `<div class="row" data-c="${c.id}"><b>${E(c.name)}</b><span>${E(c.contact)} ${E(c.phone)}</span><em>${n} quote${n==1?'':'s'}</em></div>`}).join(''):'<p class="empty">No customers yet. They are added automatically with each quote, or tap New.</p>';
+}
+function tm(){
+  return Object.entries(S.staff).map(([id,s])=>`<div class="row" data-s="${id}"><div class="l"><b>${E(s.name)} (${E(s.ini)})</b><span>${s.active===false?'Inactive':'Active'}</span></div><em>${RL[s.role]||s.role}${s.admin?' · Admin':''}</em></div>`).join('');
+}
+function render(){
+  const m=my();
+  if(!m||m.active===false)return msg('Your account is waiting for a CRM admin to activate it and set your role. <a href="#" onclick="SB.auth.signOut().then(()=>location.reload());return false">Sign out</a>');
+  const tabs=[['fu','Follow-ups','✓'],['pl','Pipeline','▥'],['qt','Quotes','☰'],['vs','Activities','◷'],['cu','Customers','⌂']];
+  if(isAdmin())tabs.push(['tm','Team','⚙']);
+  if(!tabs.some(t=>t[0]===S.tab))S.tab='fu';
+  const V={fu,pl,qt,vs:vsc,cu,tm}[S.tab],ti=tabs.find(t=>t[0]===S.tab)[1];
+  $('#app').innerHTML=`<aside><div class="logo">Macfil CRM</div>${tabs.map(([k,l,i])=>`<button data-t="${k}" class="${k===S.tab?'on':''}"><i>${i}</i><span>${l}</span></button>`).join('')}<div class="me">${E(m.name)}<small>${RL[m.role]}</small></div></aside><div class="shell"><div class="top"><h1>${ti}</h1><button class="so" onclick="SB.auth.signOut().then(()=>location.reload())">Sign out</button><input id="gs" placeholder="Search quotes, press Enter">${(canEdit()||S.tab==='tm')?'<button class="cta" id="add">+ Create</button>':''}</div><main>${V()}</main></div>`;
+}
+
+function modal(title,F,v,save,del){
+  const el=$('#modal');el.hidden=false;
+  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.dl?' list="cl"':''}${f.t==='file'?' multiple accept="image/*"':''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
+  const fm=el.firstChild;
+  $('#x').onclick=()=>{el.hidden=true};
+  if(del)$('#del').onclick=async()=>{if(confirm('Delete this record?')){await del();el.hidden=true}};
+  fm.onsubmit=async e=>{e.preventDefault();try{await save(Object.fromEntries(new FormData(fm)));el.hidden=true}catch(x){alert('Could not save: '+(x.message||x))}};
+  return fm;
+}
+const inis=cur=>['',...new Set([...Object.values(S.staff).filter(s=>s.active!==false).map(s=>s.ini),...(cur?[cur]:[])])];
+
+function quoteForm(q,cu){
+  const v=q||{curr:'RM',stage:ST[0],outcome:'Open',rev:0,customer:cu||'',sales:seeAll()?'':my().ini};
+  modal(q?'Edit '+qno(q):'New quotation',[
+    {k:'customer',l:'Customer',dl:1},{k:'desc',l:'Description',t:'area'},
+    {k:'curr',l:'Currency',t:'select',o:['RM','USD']},{k:'price',l:'Price',t:'number'},
+    {k:'product',l:'Product code (e.g. BC, GN, SP)'},{k:'brand',l:'Brand'},
+    {k:'sales',l:'Sales',t:'select',o:inis(v.sales)},{k:'ae',l:'AE',t:'select',o:inis(v.ae)},
+    {k:'stage',l:'Stage',t:'select',o:ST},{k:'outcome',l:'Outcome',t:'select',o:OC},{k:'approval',l:'Approval',t:'select',o:['Not needed','Pending','Approved','Rejected']},{k:'approver',l:'Approver (choose per deal)',t:'select',o:inis(v.approver)},{k:'cTech',l:'Technical review',t:'select',o:['Pending','Done','N/A']},{k:'cCost',l:'Supplier or stock cost known',t:'select',o:['Pending','Done','N/A']},{k:'cMargin',l:'Margin checked',t:'select',o:['Pending','Done','N/A']},{k:'rev',l:'Revision number (0 = original)',t:'number'},{k:'order',l:'Order status (after PO)',t:'select',o:[['','Not yet'],...ORD.slice(1)]},
+    {k:'reason',l:'Reason (for Lost or Declined)'},{k:'next',l:'Next follow-up',t:'date'},{k:'remark',l:'Remark',t:'area'}],
+    v,d=>saveQ(d,q),q&&isAdmin()?()=>DB.collection('quotes').doc(q.id).delete():null);
+}
+async function ensureCust(name){
+  if(S.custs.some(c=>c.name.toLowerCase()===name.toLowerCase()))return;
+  await DB.collection('customers').doc('c'+Date.now().toString(36)).set({name});
+}
+async function saveQ(d,q){
+  d.price=Number(d.price)||0;d.customer=d.customer.trim();
+  if(!d.customer)throw Error('Customer is required.');
+  if(d.stage==='Quoted'&&(!q||q.stage!=='Quoted'))d.next=addDays(3);d.rev=Number(d.rev)||0;
+  await ensureCust(d.customer);
+  const C=DB.collection('quotes');
+  if(q)return C.doc(q.id).update(d);
+  const{data:seq,error}=await SB.rpc('next_seq');if(error)throw error;await C.doc('q'+seq).set({...d,seq,date:today(),by:UID});
+}
+function custForm(c){
+  const v=c||{};
+  modal(c?'Edit customer':'New customer',[{k:'name',l:'Company name'},{k:'contact',l:'Contact person'},{k:'phone',l:'Phone',t:'tel'},{k:'email',l:'Email',t:'email'}],v,
+    async d=>{if(!d.name.trim())throw Error('Company name is required.');
+      if(c)return DB.collection('customers').doc(c.id).update(d);
+      return DB.collection('customers').doc('c'+Date.now().toString(36)).set(d)},
+    c&&isAdmin()?()=>DB.collection('customers').doc(c.id).delete():null);
+}
+function staffForm(id){
+  const v=id?S.staff[id]:{role:'sales',admin:false,active:true};
+  const vv={...v,admin:v.admin?'yes':'no',active:v.active===false?'no':'yes',find:''};
+  let pid=id,pname=v.name||'';
+  const F=[...(id?[{k:'name',l:'Name',ro:1}]:[{k:'find',l:'Find person (type a name)'}]),{k:'ini',l:'Initials'},
+    {k:'role',l:'Role',t:'select',o:Object.entries(RL)},{k:'admin',l:'User admin',t:'select',o:['no','yes']},{k:'active',l:'Active',t:'select',o:['yes','no']}];
+  const fm=modal(id?'Edit person':'Add person',F,vv,async d=>{
+    if(!pid)throw Error('Search and pick a person first.');
+    if(!d.ini.trim())throw Error('Initials are required.');
+    await DB.collection('staff').doc(pid).set({...(S.staff[pid]||{}),name:pname,ini:d.ini.trim().toUpperCase(),role:d.role,admin:d.admin==='yes',active:d.active!=='no'})});
+  if(!id){let t;fm.find.oninput=()=>{clearTimeout(t);t=setTimeout(async()=>{
+    const r=fm.find.value.trim().length>1?await U.search(fm.find.value.trim()):[];
+    $('#res').innerHTML=r.map(p=>`<button type="button" data-p="${p.id}" data-n="${E(p.name)}">${E(p.name)}${p.email?' · '+E(p.email):''}</button>`).join('');
+    $('#res').onclick=e=>{const b=e.target.closest('button');if(!b)return;pid=b.dataset.p;pname=b.dataset.n;fm.find.value=pname;$('#res').innerHTML='<small>Selected</small>'};
+  },300)}}
+}
+
+document.addEventListener('click',e=>{
+  if(e.target.closest('.mv,[data-ed]'))return;const t=e.target.closest('[data-t],[data-e],[data-c],[data-s],[data-f],[data-sort],[data-v],[data-vs],[data-act],#add');if(!t||!my())return;
+  if(t.dataset.act)act(t.dataset.act);
+  else if(t.dataset.sort){const c=t.dataset.sort;S.sort=S.sort.k===c?{k:c,d:-S.sort.d}:{k:c,d:1};$('#list').innerHTML=qlist()}
+  else if(t.dataset.t){S.tab=t.dataset.t;render()}
+  else if(t.dataset.vs){S.vs=t.dataset.vs;render()}
+  else if(t.dataset.v){const v=S.visits.find(x=>x.id===t.dataset.v);if(v&&canEdit())visitForm(v)}
+  else if(t.dataset.f){S.scope=t.dataset.f;render()}
+  else if(t.dataset.e){const q=S.quotes.find(x=>x.id===t.dataset.e);if(q)quoteView(q)}
+  else if(t.dataset.c){const c=S.custs.find(x=>x.id===t.dataset.c);if(c)custView(c)}
+  else if(t.dataset.s){if(isAdmin())staffForm(t.dataset.s)}
+  else if(t.id==='add'){S.tab==='tm'?alert('To add staff: send them this CRM link and ask them to create an account with their work email. They will appear here as Inactive; tap their name to set initials and role, and set Active to yes.'):S.tab==='cu'?custForm():S.tab==='vs'?visitForm():quoteForm()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='srch'){S.q=e.target.value;$('#list').innerHTML=qlist()}});
+let dragId;
+async function moveQ(id,stage){const q=S.quotes.find(x=>x.id===id);if(!q||!canEdit()||(q.stage||ST[0])===stage||(!seeAll()&&!mine(q)))return;const u={stage};if(stage==='Quoted')u.next=addDays(3);await DB.collection('quotes').doc(id).update(u)}
+document.addEventListener('dragstart',e=>{const c=e.target.closest('.card');if(c){dragId=c.dataset.id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragId)}});
+document.addEventListener('dragover',e=>{const c=e.target.closest('.col');if(c&&dragId){e.preventDefault();c.classList.add('over')}});
+document.addEventListener('dragleave',e=>{const c=e.target.closest('.col');if(c&&!c.contains(e.relatedTarget))c.classList.remove('over')});
+document.addEventListener('drop',e=>{const c=e.target.closest('.col');if(!c||!dragId)return;e.preventDefault();moveQ(dragId,c.dataset.stage);dragId=null});
+document.addEventListener('dragend',()=>{dragId=null;document.querySelectorAll('.over').forEach(x=>x.classList.remove('over'))});
+document.addEventListener('change',e=>{const d=e.target.dataset;if(d.mv)moveQ(d.mv,e.target.value);else if(d.ed){const[id,fl]=d.ed.split(':'),val=fl==='price'?Number(e.target.value)||0:e.target.value;if(fl==='stage')moveQ(id,val);else DB.collection('quotes').doc(id).update({[fl]:val}).catch(x=>alert('Could not save: '+(x.message||x)))}
+  else if(d.fl){S.fl[d.fl]=e.target.value;$('#list').innerHTML=qlist()}});
+document.addEventListener('keydown',e=>{if(e.target.id==='gs'&&e.key==='Enter'){S.q=e.target.value;S.tab='qt';render()}});
+function login(mode){
+  const up=mode==='up';
+  $('#app').innerHTML=`<form id="lg" class="lg"><h1>Macfil CRM</h1>${up?'<input name="nm" placeholder="Full name" required>':''}<input name="em" type="email" placeholder="Work email" required autocomplete="username"><input name="pw" type="password" placeholder="Password (at least 8 characters)" required minlength="8" autocomplete="${up?'new-password':'current-password'}"><button class="cta">${up?'Create account':'Sign in'}</button><p class="cnt" id="lm"></p><a href="#" id="sw">${up?'Already have an account? Sign in':'New staff? Create an account'}</a><a href="#" id="fp">Forgot password</a></form>`;
+  const f=$('#lg'),m=$('#lm');
+  $('#sw').onclick=e=>{e.preventDefault();login(up?'in':'up')};
+  $('#fp').onclick=async e=>{e.preventDefault();if(!f.em.value)return m.textContent='Type your email first.';const r=await SB.auth.resetPasswordForEmail(f.em.value,{redirectTo:location.origin});m.textContent=r.error?r.error.message:'Password reset email sent.'};
+  f.onsubmit=async e=>{e.preventDefault();m.textContent='Please wait…';
+    const r=up?await SB.auth.signUp({email:f.em.value,password:f.pw.value,options:{data:{name:f.nm.value}}}):await SB.auth.signInWithPassword({email:f.em.value,password:f.pw.value});
+    if(r.error)return m.textContent=r.error.message;
+    if(up&&!r.data.session)return m.textContent='Check your email and click the confirmation link, then sign in.';
+    location.reload()};
+}
+SB?.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){const p=prompt('Type your new password (at least 8 characters)');if(p)SB.auth.updateUser({password:p}).then(r=>alert(r.error?r.error.message:'Password updated.'))}});
+init();
+</script></body></html>

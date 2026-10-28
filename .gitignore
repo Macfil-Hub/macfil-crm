@@ -1,0 +1,9 @@
+# Never commit secret keys or local settings
+.env
+*.local
+.claude/settings.local.json
+~$*
+# Business data stays off GitHub (the repo will be public for GitHub Pages)
+*.xlsx
+*.xls
+*.csv
