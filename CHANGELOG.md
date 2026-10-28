@@ -9,3 +9,4 @@
 - Connected the app to Macfil's Supabase project (Singapore). The database setup script has been run.
 - Fixed: the "Forgot password" email link now opens the CRM page itself, not the bare GitHub address.
 - Fixed: the sign-up confirmation email now always links back to the CRM page.
+- Added rls_test.sql: a one-click check, run in Supabase, that each role sees and changes only what it should. It leaves no data behind.
