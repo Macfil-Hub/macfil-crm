@@ -172,7 +172,7 @@ function vsc(){
 function visitForm(v,pre){
   const d0=v||{type:'Visit',status:'Planned',owner:my().ini,date:today(),...pre};
   let fm;
-  fm=modal(v?(v.type||'Visit')+': '+v.customer:'New activity',[{k:'type',l:'Type',t:'select',o:['Visit','Call','Meeting','Email','Note']},{k:'customer',l:'Customer',dl:1},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'purpose',l:'Subject or purpose'},{k:'owner',l:'Visit owner',t:'select',o:seeAll()?inis(d0.owner):[my().ini]},{k:'quotes',l:'Related quote numbers (e.g. 1617, 1620)'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']},{k:'attendees',l:'Who attended'},{k:'notes',l:'Discussion notes',t:'area'},{k:'outcome',l:'Outcome',t:'area'},{k:'next',l:'Next action, follow-up date',t:'date'},{k:'photos',l:'Photos'}],d0,async d=>{
+  fm=modal(v?(v.type||'Visit')+': '+v.customer:'New activity',[{k:'type',l:'Type',t:'select',o:['Visit','Call','Meeting','Email','Note']},{k:'customer',l:'Customer',dl:1},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'purpose',l:'Subject or purpose'},{k:'owner',l:'Visit owner',t:'select',o:seeAll()?inis(d0.owner):[my().ini]},{k:'quotes',l:'Related quote numbers (e.g. 1617, 1620)'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']},{k:'attendees',l:'Who attended'},{k:'notes',l:'Discussion notes',t:'area'},{k:'outcome',l:'Outcome',t:'area'},{k:'next',l:'Next action, follow-up date',t:'date'},{k:'photos',l:'Photos',t:'file'}],d0,async d=>{
     d.customer=d.customer.trim();if(!d.customer)throw Error('Customer is required.');
     if(d.status==='Done'&&!d.notes.trim()&&!d.outcome.trim())throw Error('Add notes or an outcome to report the visit.');
     delete d.photos;const ph=[...(v?.photos||[])],fs=[...fm.photos.files];

@@ -11,3 +11,4 @@
 - Fixed: the sign-up confirmation email now always links back to the CRM page.
 - Added rls_test.sql: a one-click check, run in Supabase, that each role sees and changes only what it should. It leaves no data behind.
 - Tightened access rules (fix_01_create_rules.sql): Sales staff can only create quotes where they are Sales or AE, and only their own activities. The app now explains this instead of showing a database error.
+- Fixed: saving a visit or activity failed with "Could not save"; the Photos field is now a proper photo picker.
