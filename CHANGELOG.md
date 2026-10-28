@@ -6,3 +6,4 @@
 - Fixed: the page got stuck on "Loading…" before the Supabase address was filled in; it now shows the "Setup not finished" message.
 - Started a git history for the project.
 - Database setup script: added access grants that newer Supabase projects need, so signed-in staff can reach the tables.
+- Connected the app to Macfil's Supabase project (Singapore). The database setup script has been run.

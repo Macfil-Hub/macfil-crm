@@ -75,7 +75,7 @@ aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margi
 <body><div id="app"><p class="empty">Loading…</p></div><div id="modal" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script>
-const CFG={url:'PASTE_YOUR_SUPABASE_URL_HERE',key:'PASTE_YOUR_SUPABASE_ANON_KEY_HERE'};
+const CFG={url:'https://bkadjtlwkcfpjoxuvmrg.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYWRqdGx3a2NmcGpveHV2bXJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNzA1NzgsImV4cCI6MjEwODc0NjU3OH0.Opuohzr4OQnXjwQe64_3Ih7H62gOa59CT4iqjQm7_SU'};
 const SB=CFG.url.startsWith('PASTE')?null:supabase.createClient(CFG.url,CFG.key);
 const run=async p=>{const{error}=await p;if(error)throw error};
 const col=n=>({
