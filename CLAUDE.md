@@ -92,6 +92,14 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 | Activities | Planned and Done lists |
 | Team | Admin only |
 
+## Sales career development
+- Combines the Macfil sales career development programme (workflow document of 16 Oct 2026) with the CRM. Screen: Career (managers) / My progress (staff in the programme).
+- Tables from `setup_career.sql`: `career` (one row per staff id: level, start, range, certs, targets, training, assess, onb, notes, reviews) and `career_settings` (row `main`: KPI targets, training modules and expected months per level).
+- Access: managers read and write all; a staff member reads only their own row; finance and support see none.
+- KPIs are computed in the browser from quotes (Sales or AE), customers and activities. Won date is the quote's `won` field (set when the stage becomes Won), falling back to the quote date.
+- Readiness: Ready = at least 75% of KPI targets met, all training passed, and a manager note or review in the last 92 days. Developing = at least 50% of each. At risk = longer than expected at the level with no review in 92 days.
+- Default targets and training modules are drafts; Wong confirms them under Programme settings.
+
 ## Backlog (in this order)
 1. **Deploy the prototype.** Set up the GitHub repo, GitHub Pages and the Supabase project. Run `setup.sql`. Test RLS with one test user per role.
 2. **Manager dashboard charts:**

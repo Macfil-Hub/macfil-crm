@@ -71,7 +71,27 @@ td.late{color:var(--warn);font-weight:600}
 aside{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));z-index:6}
 aside .logo,aside .me{display:none}aside button{flex:1;flex-direction:column;gap:2px;font-size:11px;padding:6px 2px;border-left:0;border-top:3px solid transparent;justify-content:center;align-items:center}
 aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margin-left:auto}.col{width:78vw}}
-.ph{width:72px;height:72px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0}td select,td input{padding:4px 6px;font-size:13px;width:auto;min-width:90px}.lg{max-width:380px;margin:10vh auto;padding:24px;display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;width:calc(100% - 32px)}.lg h1{margin:0 0 4px}.lg a{color:var(--acc);font-size:14px}.so{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;flex:none}.empty a{color:var(--acc)}</style></head>
+.ph{width:72px;height:72px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0}td select,td input{padding:4px 6px;font-size:13px;width:auto;min-width:90px}.lg{max-width:380px;margin:10vh auto;padding:24px;display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;width:calc(100% - 32px)}.lg h1{margin:0 0 4px}.lg a{color:var(--acc);font-size:14px}.so{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;flex:none}.empty a{color:var(--acc)}
+/* Career development */
+.pn{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px}.pn>h2:first-child{margin-top:0}.pn.warn{border-color:var(--warn)}.pn.hi{border-color:#ff7a59}
+.g2{display:grid;gap:0 12px}@media(min-width:900px){.g2{grid-template-columns:1fr 1fr}}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}.hd h2{margin:0;font-size:22px}.hd .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sb{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 14px Barlow,system-ui,sans-serif;cursor:pointer}
+.bdg{font-size:13px;font-weight:700;padding:3px 10px;border:1px solid;border-radius:6px;white-space:nowrap}.r-ready{color:var(--ok)}.r-developing{color:var(--acc)}.r-early{color:var(--mut)}.r-risk{color:var(--warn)}
+.tag{font-size:11px;font-weight:700;border:1px solid var(--line);color:var(--mut);padding:0 5px;border-radius:4px;margin-left:6px}
+.gz{display:block;width:100%;text-align:left;background:none;border:0;padding:0;margin:0 0 12px;color:inherit;font:inherit}.gz[data-ck]{cursor:pointer}.gz[data-ck]:hover .gl{text-decoration:underline}
+.gz .l{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:4px}.gz .gl{color:var(--mut)}.gz b{font-weight:700;white-space:nowrap}.gz b small{color:var(--mut);font-weight:400}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:#ff7a59}.bar i.ok{background:var(--ok)}
+.up{color:var(--ok);font-size:12px}.dn{color:var(--warn);font-size:12px}
+.ck{display:flex;gap:8px;padding:3px 0;color:var(--mut)}.ck.ok{color:var(--ink)}.ck.ok b{color:var(--ok)}
+.nx{background:var(--bg);border-left:4px solid #ff7a59;padding:8px 12px;border-radius:4px;margin-top:8px;font-size:14px}.nx ul{margin:4px 0 0;padding-left:18px}
+.rail{display:flex;gap:4px}.rail div{flex:1;text-align:center;font-size:13px;color:var(--mut);border-top:4px solid var(--line);padding-top:6px}.rail .p{border-color:var(--mut)}.rail .c{border-color:#ff7a59;color:var(--ink);font-weight:700}
+.tr{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}.tr:last-child{border-bottom:0}.tr span{flex:1;min-width:140px}.tr small{color:var(--mut)}.tr select,.tr input{width:auto;padding:5px 8px;font-size:14px}
+.act{margin-top:4px;padding:5px 8px;border-left:3px solid var(--acc);background:var(--bg);border-radius:4px;font-size:14px}.act.late{border-left-color:var(--warn)}.act.done{border-left-color:var(--ok);color:var(--mut)}
+.lnk{background:none;border:0;color:var(--acc);font:inherit;cursor:pointer;padding:0;text-decoration:underline}
+.kpi div.late b{color:var(--warn)}
+@media print{aside,.top,.sb,.cta,.lnk,#modal{display:none!important}#app{display:block}main{padding:0}.pn{break-inside:avoid}}
+</style></head>
 <body><div id="app"><p class="empty">Loading…</p></div><div id="modal" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script>
@@ -93,7 +113,7 @@ const ST=['New enquiry','Technical and sourcing','Pricing and approval','Quoted'
 const OC=['Open','Lost','Declined','Cancelled'];
 const ORD=['','Order placed','Delivered','Invoiced','Paid'];
 const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales / AE'};
-const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{stage:'',outcome:'',owner:'',product:''},sort:{k:'seq',d:-1}};
+const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{stage:'',outcome:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null};
 let DB,U,UID;
 const today=()=>new Date().toISOString().slice(0,10);
 const my=()=>S.staff[UID];
@@ -126,6 +146,8 @@ async function init(){
   DB.collection('quotes').onSnapshot(s=>{S.quotes=s.docs.map(d=>({id:d.id,...d.data()}));render()});
   DB.collection('customers').onSnapshot(s=>{S.custs=s.docs.map(d=>({id:d.id,...d.data()}));render()});
   DB.collection('visits').onSnapshot(s=>{S.visits=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  DB.collection('career').onSnapshot(s=>{S.career={};S.cOK=true;s.docs.forEach(d=>S.career[d.id]=d.data());render()});
+  DB.collection('career_settings').onSnapshot(s=>{const m=s.docs.find(d=>d.id==='main');S.cset=m?m.data():null;render()});
 }
 
 function qrow(q){
@@ -140,7 +162,7 @@ function fu(){
   const wk=addDays(7),k=v=>v.status==='Done'?v.next:v.date;
   const vl=vvis().filter(v=>((v.status==='Planned'&&v.date<=wk)||(v.status==='Done'&&v.next&&v.next<=wk))&&(sc||v.owner===my().ini)).sort((a,b)=>(k(a)||'9')<(k(b)||'9')?-1:1);
   const sum=l=>fmt(l.reduce((a,q)=>a+(q.price||0),0));
-  return `<div class="kpi"><div><b>${all.length}</b><small>Open quotes</small></div><div><b>${od}</b><small>Overdue follow-ups</small></div><div><b>${sum(all)}</b><small>Pipeline value</small></div><div><b>${sum(owed)}</b><small>Invoiced, to collect</small></div></div>`+
+  return careerStrip()+`<div class="kpi"><div><b>${all.length}</b><small>Open quotes</small></div><div><b>${od}</b><small>Overdue follow-ups</small></div><div><b>${sum(all)}</b><small>Pipeline value</small></div><div><b>${sum(owed)}</b><small>Invoiced, to collect</small></div></div>`+
   (seeAll()?`<div class="seg"><button data-f="mine" class="${S.scope==='mine'?'on':''}">Mine</button><button data-f="all" class="${S.scope==='all'?'on':''}">Everyone</button></div>`:'')+
   (vl.length?`<h2>Activities due<small>next 7 days</small></h2>${vl.map(vrow).join('')}`:'')+
   `<h2>Quote follow-ups</h2>`+(list.length?list.map(qrow).join(''):'<p class="empty">No open quotes to follow up. Tap Create to add one.</p>');
@@ -215,9 +237,10 @@ function render(){
   const m=my();
   if(!m||m.active===false)return msg('Your account is waiting for a CRM admin to activate it and set your role. <a href="#" onclick="SB.auth.signOut().then(()=>location.reload());return false">Sign out</a>');
   const tabs=[['fu','Follow-ups','✓'],['pl','Pipeline','▥'],['qt','Quotes','☰'],['vs','Activities','◷'],['cu','Customers','⌂']];
+  if(isMgr())tabs.push(['cr','Career','★']);else if(S.career[UID])tabs.push(['cr','My progress','★']);
   if(isAdmin())tabs.push(['tm','Team','⚙']);
   if(!tabs.some(t=>t[0]===S.tab))S.tab='fu';
-  const V={fu,pl,qt,vs:vsc,cu,tm}[S.tab],ti=tabs.find(t=>t[0]===S.tab)[1];
+  const V={fu,pl,qt,vs:vsc,cu,tm,cr}[S.tab],ti=tabs.find(t=>t[0]===S.tab)[1];
   $('#app').innerHTML=`<aside><div class="logo">Macfil CRM</div>${tabs.map(([k,l,i])=>`<button data-t="${k}" class="${k===S.tab?'on':''}"><i>${i}</i><span>${l}</span></button>`).join('')}<div class="me">${E(m.name)}<small>${RL[m.role]}</small></div></aside><div class="shell"><div class="top"><h1>${ti}</h1><button class="so" onclick="SB.auth.signOut().then(()=>location.reload())">Sign out</button><input id="gs" placeholder="Search quotes, press Enter">${(canEdit()||S.tab==='tm')?'<button class="cta" id="add">+ Create</button>':''}</div><main>${V()}</main></div>`;
 }
 
@@ -245,13 +268,14 @@ function quoteForm(q,cu){
 }
 async function ensureCust(name){
   if(S.custs.some(c=>c.name.toLowerCase()===name.toLowerCase()))return;
-  await DB.collection('customers').doc('c'+Date.now().toString(36)).set({name});
+  await DB.collection('customers').doc('c'+Date.now().toString(36)).set({name,created:today(),by:UID});
 }
 async function saveQ(d,q){
   d.price=Number(d.price)||0;d.customer=d.customer.trim();
   if(!d.customer)throw Error('Customer is required.');
   if(!q&&!seeAll()&&!mine(d))throw Error('You must be the Sales or AE on your own quotes. Choose your initials in one of them.');
   if(d.stage==='Quoted'&&(!q||q.stage!=='Quoted'))d.next=addDays(3);d.rev=Number(d.rev)||0;
+  if(d.stage===ST[5]&&(!q||q.stage!==ST[5]))d.won=today();
   await ensureCust(d.customer);
   const C=DB.collection('quotes');
   if(q)return C.doc(q.id).update(d);
@@ -262,7 +286,7 @@ function custForm(c){
   modal(c?'Edit customer':'New customer',[{k:'name',l:'Company name'},{k:'contact',l:'Contact person'},{k:'phone',l:'Phone',t:'tel'},{k:'email',l:'Email',t:'email'}],v,
     async d=>{if(!d.name.trim())throw Error('Company name is required.');
       if(c)return DB.collection('customers').doc(c.id).update(d);
-      return DB.collection('customers').doc('c'+Date.now().toString(36)).set(d)},
+      return DB.collection('customers').doc('c'+Date.now().toString(36)).set({...d,created:today(),by:UID})},
     c&&isAdmin()?()=>DB.collection('customers').doc(c.id).delete():null);
 }
 function staffForm(id){
@@ -282,6 +306,160 @@ function staffForm(id){
   },300)}}
 }
 
+/* ---------- Sales career development (see setup_career.sql) ----------
+   Career records live in the `career` table, one row per staff member in the programme.
+   KPIs are worked out live from quotes, customers and activities, so nobody types them in. */
+const LV=['Junior Sales Executive','Sales Executive','Senior Sales Executive','Assistant Sales Manager'];
+const MET={quotes:{l:'Quotes issued / month',u:''},conv:{l:'Quote-to-order rate, 90 days',u:'%'},accounts:{l:'New customers / quarter',u:''},value:{l:'Orders won / month (RM)',u:''},repeat:{l:'Won value from repeat customers, 12 months',u:'%'},visits:{l:'Activities completed / month',u:''},certs:{l:'Product certification modules',u:'',mgr:1}};
+// Starting values only; managers change them under Career > Programme settings.
+const CDEF={kpi:{0:{quotes:20,conv:25,accounts:3,certs:6},1:{value:45000,conv:30,repeat:40,certs:9},2:{value:70000,conv:33,visits:12,certs:12},3:{value:120000,conv:30,visits:10,certs:14}},
+  training:{0:['Pump & mixer fundamentals','MEESB repair scope & pricing','Negotiation skills','CRM & quotation SOP'],1:['Advanced Sulzer product range','Key account management','Contract & terms review'],2:['Tender & bid preparation','Pricing & margin management','Coaching & mentoring'],3:['People management basics','Sales forecasting & pipeline review','Performance review conversations']},
+  range:{0:[12,18],1:[18,30],2:[24,36],3:[24,48]}};
+const RD={ready:'Ready',developing:'Developing',early:'Early stage'};
+const RDN={ready:'Recommended to the MD for promotion, expanded duties or a salary review.',developing:'Gaps and actions agreed; reviewed again next quarter.',early:'Coaching plan, followed up at each monthly check-in.'};
+const NT=['Monthly check-in','Coaching','Quarterly review feedback','Onboarding','Other'];
+const REC={none:'No change, continue development',promotion:'Promotion',duties:'Expanded duties',salary:'Salary review'};
+const MD={na:'Not needed',pending:'Pending MD',approved:'Approved by MD',declined:'Declined by MD'};
+const TS={'not-started':'Not started','in-progress':'In progress',done:'Complete'};
+const ONB=[['ladder','Week 1','Walked through the career ladder, what the next level needs, and the KPIs'],['crm','Week 1–2','CRM account active, initials set, first quotes logged'],['targets','Week 2','Starting targets agreed together'],['training','Week 3–4','Training plan assigned, assessment dates agreed'],['first','Day 30','First feedback note logged, monthly check-in date set']];
+const isMgr=()=>my()?.role==='manager';
+const ld=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const pd=s=>{if(!s)return null;const[y,m,d]=String(s).split('-').map(Number);return y?new Date(y,(m||1)-1,d||1):null};
+const dsince=s=>{const d=pd(s);return d?Math.round((pd(ld())-d)/864e5):Infinity};
+const dplus=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ld(d)};
+const fd=s=>{const d=pd(s);return d?d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):''};
+const qof=s=>{const d=pd(s);return d.getFullYear()+' Q'+(Math.floor(d.getMonth()/3)+1)};
+const qend=s=>{const d=pd(s);return ld(new Date(d.getFullYear(),Math.floor(d.getMonth()/3)*3+3,0))};
+const cuid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function cs(){const x=S.cset||{},o={kpi:{},training:{},range:{}};LV.forEach((_,i)=>{o.kpi[i]=x.kpi?.[i]||CDEF.kpi[i];o.training[i]=x.training?.[i]||CDEF.training[i];o.range[i]=x.range?.[i]||CDEF.range[i]});return o}
+const lvOf=c=>Math.min(LV.length-1,Math.max(0,Number(c.level)||0));
+const mir=c=>{const s=pd(c.start);if(!s)return 0;const t=new Date();let m=(t.getFullYear()-s.getFullYear())*12+t.getMonth()-s.getMonth();if(t.getDate()<s.getDate())m--;return Math.max(0,m)};
+const rangeOf=c=>c.range||cs().range[lvOf(c)];
+// Customers saved before this change have no created date; their id holds the time they were added.
+const custDate=c=>{if(c.created)return c.created;if(!/^c[0-9a-z]+$/.test(c.id||''))return'';const d=new Date(parseInt(c.id.slice(1),36));return isNaN(d)?'':ld(d)};
+
+// One KPI for one person (by initials). off=1 gives the previous period, for the change arrows.
+function crmKpi(ini,k,off=0){
+  const t=new Date(),mine=S.quotes.filter(q=>q.sales===ini||q.ae===ini),dec=q=>win(q)||['Lost','Declined'].includes(oc(q)),wd=q=>q.won||q.date||'';
+  const mS=ld(new Date(t.getFullYear(),t.getMonth()-off,1)),mE=ld(new Date(t.getFullYear(),t.getMonth()-off+1,0)),inM=s=>!!s&&s>=mS&&s<=mE;
+  if(k==='quotes'){const l=mine.filter(q=>inM(q.date));return{v:l.length,q:l,w:'Quotes dated this month where you are Sales or AE'}}
+  if(k==='value'){const l=mine.filter(q=>win(q)&&inM(wd(q)));return{v:l.reduce((a,q)=>a+(q.price||0),0),q:l,w:'Quotes moved to Won (PO received) this month'}}
+  if(k==='conv'){const to=ld(new Date(t.getFullYear(),t.getMonth(),t.getDate()-30*off)),fr=dplus(to,-90),l=mine.filter(q=>q.date>=fr&&q.date<=to&&dec(q)),w=l.filter(win).length;
+    return{v:l.length?Math.round(w/l.length*100):0,q:l,won:w,dec:l.length,w:`${w} won out of ${l.length} decided quotes (won, lost or declined) dated in the last 90 days`}}
+  if(k==='accounts'){const m0=Math.floor(t.getMonth()/3)*3-3*off,a=ld(new Date(t.getFullYear(),m0,1)),b=ld(new Date(t.getFullYear(),m0+3,0));
+    const l=S.custs.filter(c=>{const d=custDate(c);return d>=a&&d<=b}).map(c=>S.quotes.filter(q=>q.customer===c.name).sort((x,y)=>x.seq-y.seq)[0]).filter(q=>q&&(q.sales===ini||q.ae===ini));
+    return{v:l.length,q:l,w:'Customers added to the CRM this quarter whose first quote is yours'}}
+  if(k==='repeat'){const to=dplus(ld(),-30*off),fr=dplus(to,-365),l=mine.filter(q=>win(q)&&wd(q)>=fr&&wd(q)<=to);
+    const rep=l.filter(q=>S.quotes.some(o=>o.id!==q.id&&o.customer===q.customer&&win(o)&&wd(o)<wd(q))),tot=l.reduce((a,q)=>a+(q.price||0),0);
+    return{v:tot?Math.round(rep.reduce((a,q)=>a+(q.price||0),0)/tot*100):0,q:rep,w:'Won value from customers who had ordered before, over the last 12 months'}}
+  if(k==='visits'){const l=S.visits.filter(v=>v.owner===ini&&v.status==='Done'&&inM(v.date));return{v:l.length,a:l,w:'Activities marked Done this month'}}
+  return{v:0,q:[],w:''}}
+function kRows(id){const c=S.career[id],ini=S.staff[id]?.ini||'',T=cs().kpi[lvOf(c)];
+  return Object.entries(T).map(([k,t])=>{const m=MET[k]||{l:k,u:''},o=c.targets?.[k],own=o!=null&&o!=='',tg=own?Number(o):Number(t);
+    if(m.mgr)return{k,...m,t:tg,own,v:Number(c.certs)||0,prev:null};
+    const r=crmKpi(ini,k);return{k,...m,t:tg,own,v:r.v,prev:crmKpi(ini,k,1).v,r}})}
+const tRows=id=>{const c=S.career[id];return cs().training[lvOf(c)].map(n=>({n,s:c.training?.[n]||'not-started',a:c.assess?.[n]||''}))};
+const hit=id=>{const r=kRows(id);return r.length?r.filter(x=>x.v>=x.t).length/r.length:0};
+const trn=id=>{const r=tRows(id);return r.length?r.filter(x=>x.s==='done').length/r.length:0};
+const lastRev=c=>[...(c.notes||[]),...(c.reviews||[])].map(x=>x.date).filter(Boolean).sort().pop()||null;
+const recent=c=>dsince(lastRev(c))<=92;
+const cstat=id=>{const h=hit(id),t=trn(id);return h>=.75&&t===1&&recent(S.career[id])?'ready':h>=.5&&t>=.5?'developing':'early'};
+const crisk=id=>{const c=S.career[id];return mir(c)>rangeOf(c)[1]&&!recent(c)};
+function steps(id){const c=S.career[id],ini=S.staff[id]?.ini,rows=kRows(id),need=Math.ceil(rows.length*.75),miss=rows.filter(r=>r.v<r.t),o=[];
+  if(rows.length-miss.length<need){const n=need-(rows.length-miss.length);o.push(`Meet ${n} more KPI target${n>1?'s':''} (closest: ${[...miss].sort((a,b)=>b.v/(b.t||1)-a.v/(a.t||1)).slice(0,n+1).map(r=>r.l).join(', ')})`)}
+  const cv=miss.find(r=>r.k==='conv');
+  if(cv&&cv.t<100){const T=cv.t/100,x=Math.max(1,Math.ceil((T*cv.r.dec-cv.r.won)/(1-T))),op=S.quotes.filter(q=>(q.sales===ini||q.ae===ini)&&pre(q)).length;o.push(`To lift conversion to ${cv.t}%: win about ${x} more quote${x>1?'s':''} (${op} open now)`)}
+  const op=tRows(id).filter(t=>t.s!=='done');if(op.length)o.push('Pass the assessment for: '+op.map(t=>t.n).join(', '));
+  if(!recent(c))o.push('Book a manager review conversation');return o}
+
+function careerStrip(){const c=S.career[UID];if(!c)return'';const st=cstat(UID),r=kRows(UID),lr=lastRev(c);
+  return `<div class="pn hi"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>My progress: <span class="r-${st}">${RD[st]}</span></b><button class="lnk" data-t="cr">Open My progress →</button></div><small class="cnt">${r.filter(x=>x.v>=x.t).length} of ${r.length} KPI targets met · next check-in ${lr?fd(dplus(lr,30)):'not booked yet'}</small></div>`}
+const gz=r=>{const pct=r.t?Math.min(100,r.v/r.t*100):0,d=r.prev==null?null:r.v-r.prev;
+  return `<button type="button" class="gz"${r.r?` data-ck="${r.k}"`:''}><div class="l"><span class="gl">${E(r.l)}<span class="tag">${r.mgr?'Manager':'CRM'}</span>${r.own?'<span class="tag">Personal target</span>':''}</span><b>${fmt(r.v)}${r.u} <small>/ ${fmt(r.t)}${r.u}</small>${d>0?` <span class="up">▲${fmt(d)}</span>`:d<0?` <span class="dn">▼${fmt(-d)}</span>`:''}</b></div><div class="bar"><i class="${r.v>=r.t?'ok':''}" style="width:${pct}%"></i></div></button>`};
+const nrow=(n,mg)=>{const late=n.action&&!n.done&&n.due&&dsince(n.due)>0;
+  return `<div class="row"${mg?` data-cn="${n.id}"`:' style="cursor:default"'}><div class="l"><b>${E(n.type)}</b><span>${fd(n.date)}</span></div><span>${E(n.text)}</span>${n.action?`<div class="act ${n.done?'done':late?'late':''}">${n.done?'Done':late?'Overdue':'Open'} · ${E(n.action)}<small class="cnt"> · ${E(n.owner)}${n.due?' · due '+fd(n.due):''}</small></div>`:''}</div>`};
+const rrow=(r,mg,nr)=>`<div class="row ${r.rating==='ready'?'win':''}"${mg?` data-crv="${r.id}"`:' style="cursor:default"'}><div class="l"><b>${E(r.quarter)} · ${RD[r.rating]||''}${r.risk?' · at risk':''}</b><span>${fd(r.date)}</span></div>${mg?`<span>${r.rec==='promotion'&&nr?'Promotion to '+nr:REC[r.rec]||''} · ${MD[r.md]||''}</span>${r.reason?`<small>${E(r.reason)}</small>`:''}`:''}</div>`;
+const onb=(c,mg,dir)=>{const o=c.onb||{},n=ONB.filter(x=>o[x[0]]).length;
+  return `<div class="pn"><h2>Onboarding<small>day ${Math.max(0,dir)} of 30 · ${n}/${ONB.length} done</small></h2>${ONB.map(([k,w,l])=>`<div class="tr"><small style="width:70px">${w}</small><span>${mg?`<label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--ink)"><input type="checkbox" data-cob="${k}"${o[k]?' checked':''} style="width:auto;margin:0">${l}</label>`:`${o[k]?'✓':'–'} ${l}`}</span></div>`).join('')}${dir>30&&n<ONB.length?'<small class="r-risk">Past day 30 with steps still open.</small>':''}</div>`};
+
+function cr(){
+  if(!S.cOK)return '<p class="empty">Career development is not switched on yet. A manager needs to run <b>setup_career.sql</b> once in Supabase (SQL Editor).</p>';
+  if(!isMgr())return S.career[UID]?pv(UID):'<p class="empty">You are not in the career programme yet.</p>';
+  if(S.cp&&S.career[S.cp])return pv(S.cp);
+  S.cp=null;return tv()}
+function pv(id){
+  const c=S.career[id],p=S.staff[id]||{},mg=isMgr(),lv=lvOf(c),st=cstat(id),rk=crisk(id),rows=kRows(id),tr=tRows(id),h=hit(id),tn=trn(id),rc=recent(c),lr=lastRev(c),nx=lr?dplus(lr,30):null,nxl=!nx||dsince(nx)>0,nr=LV[lv+1],dir=dsince(c.start);
+  const acts=(c.notes||[]).filter(n=>n.action&&!n.done),late=acts.filter(n=>n.due&&dsince(n.due)>0).length,notes=[...(c.notes||[])].sort((a,b)=>a.date<b.date?1:-1),revs=[...(c.reviews||[])].sort((a,b)=>a.date<b.date?1:-1),rg=rangeOf(c);
+  return `${mg?'<p style="margin:0 0 8px"><button class="lnk" data-cr="">← All staff</button></p>':''}
+  <div class="hd"><div><h2>${E(p.name)}</h2><small class="cnt">${LV[lv]} · ${mir(c)} months in role (since ${fd(c.start)})${nr?' · working toward '+nr:''}</small></div><div class="acts"><span class="bdg r-${st}">${RD[st]}</span>${rk?'<span class="bdg r-risk">At risk</span>':''}<button class="sb" data-cprint>Print</button>${mg?`<button class="sb" data-cset="${id}">Edit setup</button>`:''}</div></div>
+  <div class="kpi"><div><b>${lr?fd(lr):'None'}</b><small>Last manager review</small></div><div class="${nxl?'late':''}"><b>${nx?fd(nx):'Not booked'}</b><small>Next monthly check-in${nx&&nxl?' (overdue)':''}</small></div><div><b>${qof(ld())}</b><small>Quarterly review by ${fd(qend(ld()))}</small></div><div class="${late?'late':''}"><b>${acts.length}</b><small>Open actions${late?`, ${late} overdue`:''}</small></div></div>
+  ${rk?`<div class="pn warn"><b class="r-risk">At risk:</b> ${mir(c)} months in role (expected ${rg[0]}–${rg[1]}) and no manager review in the last 92 days.<br><small class="cnt">The Sales Director holds a growth-path conversation before the next monthly check-in.</small></div>`:''}
+  ${dir<=60?onb(c,mg,dir):''}
+  <div class="g2"><div class="pn hi"><h2>Promotion readiness<small>${RD[st]}</small></h2>
+    <div class="ck ${h>=.75?'ok':''}"><b>${h>=.75?'✓':'–'}</b>KPI targets met: ${Math.round(h*100)}% (needs 75%)</div>
+    <div class="ck ${tn===1?'ok':''}"><b>${tn===1?'✓':'–'}</b>Training complete: ${Math.round(tn*100)}% (needs 100%)</div>
+    <div class="ck ${rc?'ok':''}"><b>${rc?'✓':'–'}</b>Manager review in the last 92 days</div>
+    <div class="nx">${st==='ready'?`<b>All criteria met.</b> Ready to discuss ${nr?'promotion to '+nr:'expanded duties'} at the ${qof(ld())} review.`:`<b>What is needed to reach Ready</b><ul>${steps(id).map(s=>`<li>${E(s)}</li>`).join('')}</ul>`}</div>
+    <p class="cnt" style="margin:8px 0 0">At the quarterly review: ${RDN[st]}</p></div>
+  <div class="pn"><h2>KPIs from the CRM<small>vs last month</small></h2>${rows.map(gz).join('')}<small class="cnt">Tap a KPI to see the quotes or activities behind it.</small></div></div>
+  <div class="g2"><div class="pn"><h2>Training<small>${tr.filter(t=>t.s==='done').length}/${tr.length}</small></h2>${tr.map(t=>`<div class="tr"><span>${E(t.n)}${t.s==='done'?`<br><small>${t.a?'Assessment passed '+fd(t.a):'Assessment date not recorded'}</small>`:''}</span>${mg?`<select data-ct="${E(t.n)}" aria-label="Status of ${E(t.n)}">${Object.entries(TS).map(([k,l])=>`<option value="${k}"${k===t.s?' selected':''}>${l}</option>`).join('')}</select>${t.s==='done'?`<input type="date" data-ca="${E(t.n)}" value="${t.a}" aria-label="Assessment passed on">`:''}`:`<small>${TS[t.s]}</small>`}</div>`).join('')}<small class="cnt">A module counts as complete only after its offline assessment is passed.</small></div>
+  <div class="pn"><h2>Career ladder</h2><div class="rail">${LV.map((l,i)=>`<div class="${i===lv?'c':i<lv?'p':''}">${l}${i===lv?'<br><small>Current</small>':i===lv+1?'<br><small>Next</small>':''}</div>`).join('')}</div></div></div>
+  <h2>Feedback and development actions<small>${mg?'<button class="lnk" data-cn="new">+ Add note</button>':notes.length}</small></h2>${notes.map(n=>nrow(n,mg)).join('')||'<p class="empty">No feedback logged yet.</p>'}
+  <h2>Quarterly reviews<small>${mg?'<button class="lnk" data-crv="new">+ Record review</button>':revs.length}</small></h2>${revs.map(r=>rrow(r,mg,nr)).join('')||'<p class="empty">No quarterly review recorded yet.</p>'}`}
+function tv(){
+  const R=Object.keys(S.career).filter(id=>S.staff[id]).map(id=>({id,c:S.career[id],p:S.staff[id],st:cstat(id),rk:crisk(id),h:hit(id),tn:trn(id),lr:lastRev(S.career[id])})).sort((a,b)=>a.p.name.localeCompare(b.p.name));
+  const n=k=>R.filter(r=>r.st===k).length,due=r=>!r.lr||dsince(r.lr)>30,K=(r,k)=>crmKpi(r.p.ini,k).v;
+  const att=[...R.filter(r=>r.rk).map(r=>[r,'late','r-risk','At risk',`${mir(r.c)} months in role, no manager review in 92 days`]),...R.filter(r=>r.st==='ready').map(r=>[r,'win','r-ready','Ready','Meets all criteria; discuss at the quarterly review']),...R.filter(r=>!r.rk&&due(r)).map(r=>[r,'','r-early','Check-in due',r.lr?'Last review '+fd(r.lr):'No review logged yet'])];
+  const out=Object.entries(S.staff).filter(([id,s])=>s.active!==false&&['sales','support'].includes(s.role)&&!S.career[id]);
+  return `<div class="kpi"><div><b class="r-ready">${n('ready')}</b><small>Ready</small></div><div><b class="r-developing">${n('developing')}</b><small>Developing</small></div><div><b>${n('early')}</b><small>Early stage</small></div><div class="${R.some(r=>r.rk)?'late':''}"><b>${R.filter(r=>r.rk).length}</b><small>At risk</small></div></div>
+  <h2>Needs your attention<small>${att.length}</small></h2>${att.map(([r,rc,c,t,w])=>`<div class="row ${rc}" data-cr="${r.id}"><div class="l"><b>${E(r.p.name)}</b><span class="${c}">${t}</span></div><small>${E(w)}</small></div>`).join('')||'<p class="empty">Nobody is at risk, ready, or due a check-in.</p>'}
+  <h2>Programme roster<small>${R.length} staff</small></h2>${R.length?`<div class="tw"><table><thead><tr><th>Name</th><th>Level</th><th>Months</th><th>Quotes (mo)</th><th>Conv. 90d</th><th>Won RM (mo)</th><th>KPIs met</th><th>Training</th><th>Readiness</th><th>Next check-in</th></tr></thead><tbody>${R.map(r=>`<tr data-cr="${r.id}"><td>${E(r.p.name)}</td><td>${LV[lvOf(r.c)]}</td><td class="${mir(r.c)>rangeOf(r.c)[1]?'late':''}">${mir(r.c)}</td><td>${K(r,'quotes')}</td><td>${K(r,'conv')}%</td><td>${fmt(K(r,'value'))}</td><td>${Math.round(r.h*100)}%</td><td>${Math.round(r.tn*100)}%</td><td><span class="r-${r.st}">${RD[r.st]}</span>${r.rk?' <span class="r-risk">· at risk</span>':''}</td><td class="${due(r)?'late':''}">${r.lr?fd(dplus(r.lr,30)):'Not booked'}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Nobody is in the programme yet. Add staff below.</p>'}
+  ${out.length?`<h2>Not in the programme yet<small>${out.length}</small></h2>${out.map(([id,s])=>`<div class="row" data-cadd="${id}"><div class="l"><b>${E(s.name)}${s.ini?' ('+E(s.ini)+')':''}</b><span class="lnk">Add</span></div><small>${RL[s.role]||s.role}</small></div>`).join('')}`:''}
+  <h2>Programme settings<small>targets and training per level</small></h2><div class="pn">${LV.map((l,i)=>`<div class="tr"><span>${l}<br><small>${Object.entries(cs().kpi[i]).map(([k,t])=>`${MET[k]?.l||k}: ${fmt(t)}${MET[k]?.u||''}`).join(' · ')}</small></span><button class="sb" data-clv="${i}">Edit</button></div>`).join('')}</div>`}
+
+function drill(k){const id=isMgr()?S.cp:UID,s=S.staff[id]||{},r=crmKpi(s.ini,k),m=MET[k];
+  sheet(`<h3>${E(m.l)}</h3><p class="cnt">${E(s.name)} · ${fmt(r.v)}${m.u}<br>${E(r.w)}</p>${r.a?r.a.map(vrow).join('')||'<p class="empty">No activities in this period.</p>':[...r.q].sort((a,b)=>b.seq-a.seq).map(qrow).join('')||'<p class="empty">No quotes in this period.</p>'}`)}
+const cdoc=id=>DB.collection('career').doc(id);
+function setupForm(id){const c=S.career[id]||{level:0,start:ld()},lv=lvOf(c),T=cs().kpi[lv],rg=rangeOf(c),v={level:String(lv),start:c.start,rmin:rg[0],rmax:rg[1],certs:c.certs||0};
+  Object.keys(T).forEach(k=>v['t_'+k]=c.targets?.[k]??'');
+  modal((S.career[id]?'Career setup: ':'Add to programme: ')+E(S.staff[id]?.name),[{k:'level',l:'Career level',t:'select',o:LV.map((l,i)=>[String(i),l])},{k:'start',l:'Started at this level on',t:'date'},{k:'rmin',l:'Expected months at this level: from',t:'number'},{k:'rmax',l:'to',t:'number'},{k:'certs',l:'Product certification modules passed',t:'number'},
+    ...Object.entries(T).map(([k,t])=>({k:'t_'+k,l:`Personal target: ${MET[k]?.l||k} (blank = level target ${fmt(t)}${MET[k]?.u||''})`,t:'number'}))],v,
+    async d=>{if(!d.start)throw Error('Pick the date they started at this level.');const nl=Number(d.level),tg={};
+      if(nl===lv)Object.keys(T).forEach(k=>{if(d['t_'+k]!=='')tg[k]=Number(d['t_'+k])});
+      const base=S.career[id]||{notes:[],reviews:[],training:{},assess:{},onb:{}};
+      await cdoc(id).set({...base,level:nl,start:d.start,range:[Number(d.rmin)||0,Number(d.rmax)||0],certs:Number(d.certs)||0,targets:tg})},
+    S.career[id]?()=>{S.cp=null;return cdoc(id).delete()}:null)}
+function noteForm(id,n){const v=n?{...n,done:n.done?'Done':'Open'}:{date:ld(),type:NT[0],owner:'Sales Manager',done:'Open'};
+  modal(n?'Edit note':'New feedback note',[{k:'date',l:'Date',t:'date'},{k:'type',l:'Type',t:'select',o:NT},{k:'text',l:'What was discussed',t:'area'},{k:'action',l:'Development action (optional)'},{k:'owner',l:'Action owner',t:'select',o:['Salesperson','Sales Manager','Sales Director']},{k:'due',l:'Action due date',t:'date'},{k:'done',l:'Action status',t:'select',o:['Open','Done']}],v,
+    async d=>{if(!d.text.trim())throw Error('Write what was discussed.');if(!d.date)throw Error('Pick a date.');const a=d.action.trim(),x={id:n?.id||cuid(),date:d.date,type:d.type,text:d.text.trim(),action:a,owner:a?d.owner:'',due:a?d.due:'',done:!!a&&d.done==='Done'};
+      const c=S.career[id];await cdoc(id).set({...c,notes:n?(c.notes||[]).map(o=>o.id===n.id?x:o):[x,...(c.notes||[])]})},
+    n?()=>{const c=S.career[id];return cdoc(id).set({...c,notes:(c.notes||[]).filter(o=>o.id!==n.id)})}:null)}
+function reviewForm(id,r){const st=cstat(id),nr=LV[lvOf(S.career[id])+1],v=r||{quarter:qof(ld()),date:ld(),rating:st,rec:st==='ready'?'promotion':'none',md:st==='ready'?'pending':'na',reason:''};
+  modal(r?'Edit quarterly review':'Record quarterly review',[{k:'quarter',l:'Quarter'},{k:'date',l:'Review date',t:'date'},{k:'rating',l:'Rating',t:'select',o:Object.entries(RD)},{k:'rec',l:'Recommendation',t:'select',o:Object.entries({...REC,promotion:nr?'Promotion to '+nr:'Promotion'})},{k:'md',l:'MD decision',t:'select',o:Object.entries(MD)},{k:'reason',l:'Reason for the rating and decision',t:'area'}],v,
+    async d=>{if(!d.quarter.trim()||!d.date)throw Error('Fill in the quarter and date.');if(['approved','declined'].includes(d.md)&&!d.reason.trim())throw Error('Record the reason for the MD decision.');
+      const c=S.career[id],x={id:r?.id||cuid(),quarter:d.quarter.trim(),date:d.date,rating:d.rating,rec:d.rec,md:d.md,reason:d.reason.trim(),risk:r?!!r.risk:crisk(id)};
+      await cdoc(id).set({...c,reviews:r?(c.reviews||[]).map(o=>o.id===r.id?x:o):[x,...(c.reviews||[])]})},
+    r?()=>{const c=S.career[id];return cdoc(id).set({...c,reviews:(c.reviews||[]).filter(o=>o.id!==r.id)})}:null)}
+function levelForm(i){const C=cs(),T=C.kpi[i],v={training:C.training[i].join('\n'),rmin:C.range[i][0],rmax:C.range[i][1]};Object.entries(T).forEach(([k,t])=>v['t_'+k]=t);
+  modal('Settings: '+LV[i],[...Object.keys(T).map(k=>({k:'t_'+k,l:'Target: '+(MET[k]?.l||k),t:'number'})),{k:'rmin',l:'Expected months at this level: from',t:'number'},{k:'rmax',l:'to',t:'number'},{k:'training',l:'Training modules, one per line (renaming a module resets its status for everyone)',t:'area'}],v,
+    async d=>{const x=JSON.parse(JSON.stringify(S.cset||{}));x.kpi={...(x.kpi||{})};x.training={...(x.training||{})};x.range={...(x.range||{})};
+      x.kpi[i]=Object.fromEntries(Object.keys(T).map(k=>[k,Number(d['t_'+k])||0]));x.training[i]=d.training.split('\n').map(s=>s.trim()).filter(Boolean);x.range[i]=[Number(d.rmin)||0,Number(d.rmax)||0];
+      if(!x.training[i].length)throw Error('Add at least one training module.');await DB.collection('career_settings').doc('main').set(x)})}
+async function csave(id,f){const c=S.career[id];if(!c)return;try{await cdoc(id).set(f(c))}catch(x){alert('Could not save: '+(x.message||x))}}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-ck],[data-cn],[data-crv],[data-cset],[data-cadd],[data-clv],[data-cprint]');if(!t||!my())return;const d=t.dataset;
+  if(d.cr!==undefined){S.cp=d.cr||null;S.tab='cr';render();scrollTo(0,0)}
+  else if(d.ck)drill(d.ck);
+  else if(d.cprint!==undefined)print();
+  else if(!isMgr())return;
+  else if(d.cn)noteForm(S.cp,d.cn==='new'?null:(S.career[S.cp]?.notes||[]).find(n=>n.id===d.cn));
+  else if(d.crv)reviewForm(S.cp,d.crv==='new'?null:(S.career[S.cp]?.reviews||[]).find(r=>r.id===d.crv));
+  else if(d.cset||d.cadd)setupForm(d.cset||d.cadd);
+  else if(d.clv)levelForm(Number(d.clv))});
+document.addEventListener('change',e=>{const d=e.target.dataset,id=S.cp;if(!(d.ct||d.ca||d.cob)||!my()||!isMgr()||!S.career[id])return;
+  if(d.ct){const n=d.ct,v=e.target.value;csave(id,c=>{const a={...(c.assess||{})};if(v==='done'){if(!a[n])a[n]=ld()}else delete a[n];return{...c,training:{...(c.training||{}),[n]:v},assess:a}})}
+  else if(d.ca)csave(id,c=>({...c,assess:{...(c.assess||{}),[d.ca]:e.target.value}}));
+  else csave(id,c=>({...c,onb:{...(c.onb||{}),[d.cob]:e.target.checked}}))});
+
 document.addEventListener('click',e=>{
   if(e.target.closest('.mv,[data-ed]'))return;const t=e.target.closest('[data-t],[data-e],[data-c],[data-s],[data-f],[data-sort],[data-v],[data-vs],[data-act],#add');if(!t||!my())return;
   if(t.dataset.act)act(t.dataset.act);
@@ -293,11 +471,11 @@ document.addEventListener('click',e=>{
   else if(t.dataset.e){const q=S.quotes.find(x=>x.id===t.dataset.e);if(q)quoteView(q)}
   else if(t.dataset.c){const c=S.custs.find(x=>x.id===t.dataset.c);if(c)custView(c)}
   else if(t.dataset.s){if(isAdmin())staffForm(t.dataset.s)}
-  else if(t.id==='add'){S.tab==='tm'?alert('To add staff: send them this CRM link and ask them to create an account with their work email. They will appear here as Inactive; tap their name to set initials and role, and set Active to yes.'):S.tab==='cu'?custForm():S.tab==='vs'?visitForm():quoteForm()}
+  else if(t.id==='add'){S.tab==='cr'&&isMgr()?(S.cp?noteForm(S.cp):alert('To add someone to the programme, use "Add" under "Not in the programme yet" at the bottom of this screen.')):S.tab==='tm'?alert('To add staff: send them this CRM link and ask them to create an account with their work email. They will appear here as Inactive; tap their name to set initials and role, and set Active to yes.'):S.tab==='cu'?custForm():S.tab==='vs'?visitForm():quoteForm()}
 });
 document.addEventListener('input',e=>{if(e.target.id==='srch'){S.q=e.target.value;$('#list').innerHTML=qlist()}});
 let dragId;
-async function moveQ(id,stage){const q=S.quotes.find(x=>x.id===id);if(!q||!canEdit()||(q.stage||ST[0])===stage||(!seeAll()&&!mine(q)))return;const u={stage};if(stage==='Quoted')u.next=addDays(3);await DB.collection('quotes').doc(id).update(u)}
+async function moveQ(id,stage){const q=S.quotes.find(x=>x.id===id);if(!q||!canEdit()||(q.stage||ST[0])===stage||(!seeAll()&&!mine(q)))return;const u={stage};if(stage==='Quoted')u.next=addDays(3);if(stage===ST[5])u.won=today();await DB.collection('quotes').doc(id).update(u)}
 document.addEventListener('dragstart',e=>{const c=e.target.closest('.card');if(c){dragId=c.dataset.id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragId)}});
 document.addEventListener('dragover',e=>{const c=e.target.closest('.col');if(c&&dragId){e.preventDefault();c.classList.add('over')}});
 document.addEventListener('dragleave',e=>{const c=e.target.closest('.col');if(c&&!c.contains(e.relatedTarget))c.classList.remove('over')});
