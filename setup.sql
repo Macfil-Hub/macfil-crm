@@ -59,6 +59,11 @@ create policy visits_edit on visits for update to authenticated
   using (can_edit() and (see_all() or data->>'owner' = me()->>'ini'));
 create policy visits_delete on visits for delete to authenticated using (is_admin());
 
+-- Let signed-in users reach the tables through the app (the rules above still decide what each person sees).
+-- Newer Supabase projects no longer grant this automatically.
+grant select, insert, update, delete on staff, quotes, customers, visits to authenticated;
+grant execute on function next_seq(), me(), see_all(), can_edit(), is_admin() to authenticated;
+
 -- Live updates between users
 alter publication supabase_realtime add table staff, quotes, customers, visits;
 
