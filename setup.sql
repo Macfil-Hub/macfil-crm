@@ -42,7 +42,8 @@ create policy staff_admin on staff for all to authenticated using (is_admin()) w
 
 create policy quotes_read on quotes for select to authenticated
   using (see_all() or (me() is not null and me()->>'ini' in (data->>'sales', data->>'ae')));
-create policy quotes_add on quotes for insert to authenticated with check (can_edit());
+create policy quotes_add on quotes for insert to authenticated
+  with check (can_edit() and (see_all() or me()->>'ini' in (data->>'sales', data->>'ae')));
 create policy quotes_edit on quotes for update to authenticated
   using (can_edit() and (see_all() or me()->>'ini' in (data->>'sales', data->>'ae')));
 create policy quotes_delete on quotes for delete to authenticated using (is_admin());
@@ -54,7 +55,8 @@ create policy customers_delete on customers for delete to authenticated using (i
 
 create policy visits_read on visits for select to authenticated
   using (see_all() or (me() is not null and data->>'owner' = me()->>'ini'));
-create policy visits_add on visits for insert to authenticated with check (can_edit());
+create policy visits_add on visits for insert to authenticated
+  with check (can_edit() and (see_all() or data->>'owner' = me()->>'ini'));
 create policy visits_edit on visits for update to authenticated
   using (can_edit() and (see_all() or data->>'owner' = me()->>'ini'));
 create policy visits_delete on visits for delete to authenticated using (is_admin());

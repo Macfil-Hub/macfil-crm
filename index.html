@@ -250,6 +250,7 @@ async function ensureCust(name){
 async function saveQ(d,q){
   d.price=Number(d.price)||0;d.customer=d.customer.trim();
   if(!d.customer)throw Error('Customer is required.');
+  if(!q&&!seeAll()&&!mine(d))throw Error('You must be the Sales or AE on your own quotes. Choose your initials in one of them.');
   if(d.stage==='Quoted'&&(!q||q.stage!=='Quoted'))d.next=addDays(3);d.rev=Number(d.rev)||0;
   await ensureCust(d.customer);
   const C=DB.collection('quotes');
