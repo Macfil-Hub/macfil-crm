@@ -310,7 +310,7 @@ function login(mode){
   $('#app').innerHTML=`<form id="lg" class="lg"><h1>Macfil CRM</h1>${up?'<input name="nm" placeholder="Full name" required>':''}<input name="em" type="email" placeholder="Work email" required autocomplete="username"><input name="pw" type="password" placeholder="Password (at least 8 characters)" required minlength="8" autocomplete="${up?'new-password':'current-password'}"><button class="cta">${up?'Create account':'Sign in'}</button><p class="cnt" id="lm"></p><a href="#" id="sw">${up?'Already have an account? Sign in':'New staff? Create an account'}</a><a href="#" id="fp">Forgot password</a></form>`;
   const f=$('#lg'),m=$('#lm');
   $('#sw').onclick=e=>{e.preventDefault();login(up?'in':'up')};
-  $('#fp').onclick=async e=>{e.preventDefault();if(!f.em.value)return m.textContent='Type your email first.';const r=await SB.auth.resetPasswordForEmail(f.em.value,{redirectTo:location.origin});m.textContent=r.error?r.error.message:'Password reset email sent.'};
+  $('#fp').onclick=async e=>{e.preventDefault();if(!f.em.value)return m.textContent='Type your email first.';const r=await SB.auth.resetPasswordForEmail(f.em.value,{redirectTo:location.origin+location.pathname});m.textContent=r.error?r.error.message:'Password reset email sent.'};
   f.onsubmit=async e=>{e.preventDefault();m.textContent='Please wait…';
     const r=up?await SB.auth.signUp({email:f.em.value,password:f.pw.value,options:{data:{name:f.nm.value}}}):await SB.auth.signInWithPassword({email:f.em.value,password:f.pw.value});
     if(r.error)return m.textContent=r.error.message;

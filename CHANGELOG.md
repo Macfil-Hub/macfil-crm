@@ -7,3 +7,4 @@
 - Started a git history for the project.
 - Database setup script: added access grants that newer Supabase projects need, so signed-in staff can reach the tables.
 - Connected the app to Macfil's Supabase project (Singapore). The database setup script has been run.
+- Fixed: the "Forgot password" email link now opens the CRM page itself, not the bare GitHub address.
