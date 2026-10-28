@@ -312,7 +312,7 @@ function login(mode){
   $('#sw').onclick=e=>{e.preventDefault();login(up?'in':'up')};
   $('#fp').onclick=async e=>{e.preventDefault();if(!f.em.value)return m.textContent='Type your email first.';const r=await SB.auth.resetPasswordForEmail(f.em.value,{redirectTo:location.origin+location.pathname});m.textContent=r.error?r.error.message:'Password reset email sent.'};
   f.onsubmit=async e=>{e.preventDefault();m.textContent='Please wait…';
-    const r=up?await SB.auth.signUp({email:f.em.value,password:f.pw.value,options:{data:{name:f.nm.value}}}):await SB.auth.signInWithPassword({email:f.em.value,password:f.pw.value});
+    const r=up?await SB.auth.signUp({email:f.em.value,password:f.pw.value,options:{data:{name:f.nm.value},emailRedirectTo:location.origin+location.pathname}}):await SB.auth.signInWithPassword({email:f.em.value,password:f.pw.value});
     if(r.error)return m.textContent=r.error.message;
     if(up&&!r.data.session)return m.textContent='Check your email and click the confirmation link, then sign in.';
     location.reload()};
