@@ -73,6 +73,17 @@ aside .logo,aside .me{display:none}aside button{flex:1;flex-direction:column;gap
 aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margin-left:auto}.col{width:78vw}}
 .ph{width:72px;height:72px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0}
 .lb{font-size:14px;color:var(--mut);margin-bottom:10px}
+.calh{display:flex;align-items:center;gap:6px;margin-bottom:8px}.calh h2{margin:0 auto 0 0;font-size:20px}
+.calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-bottom:6px}
+.wd{font-size:12px;color:var(--mut);text-align:center;font-weight:600}
+.cd{min-height:96px;display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);text-align:left;cursor:pointer;font:inherit;overflow:hidden;min-width:0}
+.cd b{font-size:13px;align-self:flex-start;padding:0 6px;border-radius:10px}.cd.ot{opacity:.45}.cd.td b{background:var(--acc);color:#fff}.cd.on{outline:2px solid var(--acc);outline-offset:-2px}
+.ev{display:block;font-style:normal;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:3px;padding:1px 4px;background:rgba(31,95,139,.13)}
+.ev.rm{background:rgba(196,87,26,.16)}.ev.fq{background:rgba(47,125,79,.15)}.ev.dn{opacity:.6;text-decoration:line-through}
+.cd small{font-size:10px;color:var(--mut)}.dots{display:none;font-style:normal;color:var(--acc);font-size:15px;line-height:1;letter-spacing:1px}
+#toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:8;width:max-content;max-width:calc(100% - 24px);background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#toast[hidden]{display:none}
+@media(max-width:799px){.cd{min-height:54px;align-items:center;padding:4px 2px}.cd b{align-self:center}.cd .ev,.cd small{display:none}.dots{display:block}}
 .pk{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}.pk label{position:relative;margin:0;padding:10px 14px;font-size:15px;color:var(--ink);cursor:pointer}
 .pk input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
 .pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.pt{position:relative}.pt img{width:72px;height:72px;object-fit:cover;border-radius:6px;display:block;background:var(--line)}
@@ -98,6 +109,7 @@ aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margi
 @media print{aside,.top,.sb,.cta,.lnk,#modal{display:none!important}#app{display:block}main{padding:0}.pn{break-inside:avoid}}
 </style></head>
 <body><div id="app"><p class="empty">Loading…</p></div><div id="modal" hidden></div>
+<div id="toast" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script>
 const CFG={url:'https://bkadjtlwkcfpjoxuvmrg.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrYWRqdGx3a2NmcGpveHV2bXJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNzA1NzgsImV4cCI6MjEwODc0NjU3OH0.Opuohzr4OQnXjwQe64_3Ih7H62gOa59CT4iqjQm7_SU'};
@@ -121,7 +133,7 @@ const ORD=['','Order placed','Delivered','Invoiced','Paid'];
 const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales / AE'};
 const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{status:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null};
 let DB,U,UID;
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>ld();
 const my=()=>S.staff[UID];
 const seeAll=()=>['manager','finance','support'].includes(my().role);
 const canEdit=()=>my().role!=='finance';
@@ -135,7 +147,7 @@ const st=q=>ST.includes(q.status)?q.status:({Lost:'Lost',Declined:'Declined',Can
 const oc=q=>PIPE.includes(st(q))?'Open':st(q);
 const win=q=>st(q)==='Win';
 const pre=q=>OPEN.includes(st(q));
-const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return ld(d)};
 const vvis=()=>S.visits.filter(v=>seeAll()||v.owner===my().ini);
 const msg=t=>{$('#app').innerHTML=`<p class="empty">${t}</p>`};
 
@@ -153,7 +165,7 @@ async function init(){
     render()});
   DB.collection('quotes').onSnapshot(s=>{S.quotes=s.docs.map(d=>({id:d.id,...d.data()}));render()});
   DB.collection('customers').onSnapshot(s=>{S.custs=s.docs.map(d=>({id:d.id,...d.data()}));render()});
-  DB.collection('visits').onSnapshot(s=>{S.visits=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  DB.collection('visits').onSnapshot(s=>{S.visits=s.docs.map(d=>({id:d.id,...d.data()}));render();remCheck()});
   DB.collection('career').onSnapshot(s=>{S.career={};S.cOK=true;s.docs.forEach(d=>S.career[d.id]=d.data());render()});
   DB.collection('career_settings').onSnapshot(s=>{const m=s.docs.find(d=>d.id==='main');S.cset=m?m.data():null;render()});
 }
@@ -194,15 +206,70 @@ function qlist(){
 }
 function vrow(v){
   const late=v.status==='Planned'&&v.date<today(),ph=v.photos||[];
-  return `<div class="row ${late?'late':''} ${v.status==='Done'?'win':''}" data-v="${v.id}"><div class="l"><b>${E(v.type||'Visit')} · ${E(v.customer)}</b><span>${v.date||''} ${E(v.time)}</span></div><span>${E(v.purpose)}</span><em>${E(v.owner)} · ${v.status}${v.quotes?' · quotes '+E(v.quotes):''}${late?' (not reported)':''}${v.status==='Done'&&v.next?' · next '+v.next:''}</em>${v.status==='Done'&&v.outcome?`<small>${E(v.outcome)}</small>`:''}<div>${ph.map(p=>`<img class="ph" src="${CFG.url}/storage/v1/object/public/photos/${p}" alt="Visit photo">`).join('')}</div></div>`}
+  const ics=v.status==='Planned'&&v.date>=today()?` · <button class="lnk" data-ics="${v.id}">Add to phone calendar</button>`:'';
+  return `<div class="row ${late?'late':''} ${v.status==='Done'?'win':''}" data-v="${v.id}"><div class="l"><b>${E(v.type||'Visit')}${v.type==='Reminder'?' · '+E(v.purpose):''}${v.customer?' · '+E(v.customer):''}</b><span>${v.date||''} ${E(v.time)}</span></div><span>${v.type==='Reminder'?E(v.notes):E(v.purpose)}</span><em>${E(v.owner)} · ${v.status}${v.quotes?' · quotes '+E(v.quotes):''}${late?' (not reported)':''}${v.status==='Done'&&v.next?' · next '+v.next:''}${v.remind!=null&&v.remind!==''&&v.status==='Planned'?' · ⏰ '+REM.find(r=>r[0]===String(v.remind))?.[1]:''}${ics}</em>${v.status==='Done'&&v.outcome?`<small>${E(v.outcome)}</small>`:''}<div>${ph.map(p=>`<img class="ph" src="${CFG.url}/storage/v1/object/public/photos/${p}" alt="Visit photo">`).join('')}</div></div>`}
 function vsc(){
   const up=S.vs==='up',l=vvis().filter(v=>up?v.status==='Planned':v.status!=='Planned').sort((a,b)=>(a.date<b.date?-1:1)*(up?1:-1));
   return `<div class="seg"><button data-vs="up" class="${up?'on':''}">Planned</button><button data-vs="done" class="${up?'':'on'}">Done</button></div>`+(l.length?l.map(vrow).join(''):'<p class="empty">Nothing here yet. Tap Create to schedule a visit.</p>');
 }
+// Calendar: activities on their date (a reminder is an activity of type Reminder) plus open quote follow-up dates.
+const REM=[['','No reminder'],['0','At the time'],['10','10 minutes before'],['30','30 minutes before'],['60','1 hour before'],['1440','1 day before']];
+function calItems(d){
+  const sc=seeAll()&&S.scope==='all';
+  const a=vvis().filter(v=>v.date===d&&v.status!=='Cancelled'&&(sc||v.owner===my().ini)).sort((x,y)=>(x.time||'99')<(y.time||'99')?-1:1);
+  return{a,q:visible().filter(q=>pre(q)&&q.next===d&&(sc||mine(q)))};
+}
+function cal(){
+  const t=ld(),sel=S.cd||t,[y,m]=(S.cm||sel.slice(0,7)).split('-').map(Number),f=new Date(y,m-1,1);
+  const days=[...Array(42)].map((_,i)=>ld(new Date(y,m-1,1-((f.getDay()+6)%7)+i)));
+  const cell=d=>{const{a,q}=calItems(d),n=a.length+q.length,ev=[...a.map(v=>[(v.time?v.time+' ':'')+(v.type==='Reminder'?v.purpose:v.customer),v.type==='Reminder'?'rm':v.status==='Done'?'dn':'']),...q.map(q=>['Follow up '+q.seq,'fq'])];
+    return `<button type="button" data-cd="${d}" class="cd${d===sel?' on':''}${d===t?' td':''}${+d.slice(5,7)!==m?' ot':''}"><b>${+d.slice(8)}</b>${ev.slice(0,3).map(([x,c])=>`<i class="ev ${c}">${E(x)}</i>`).join('')}${n>3?`<small>+${n-3} more</small>`:''}${n?`<em class="dots">${'•'.repeat(Math.min(n,3))}</em>`:''}</button>`};
+  const{a,q}=calItems(sel);
+  return (seeAll()?`<div class="seg"><button data-f="mine" class="${S.scope==='mine'?'on':''}">Mine</button><button data-f="all" class="${S.scope==='all'?'on':''}">Everyone</button></div>`:'')+
+  `<div class="calh"><h2>${f.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</h2><button class="sb" data-cm="-1" aria-label="Previous month">‹</button><button class="sb" data-cm="0">Today</button><button class="sb" data-cm="1" aria-label="Next month">›</button></div>
+  <div class="calg">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(w=>`<span class="wd">${w}</span>`).join('')}${days.map(cell).join('')}</div>
+  <h2>${pd(sel).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}${canEdit()?`<span><button class="sb" data-cnew="act">+ Activity</button> <button class="sb" data-cnew="rem">+ Reminder</button></span>`:''}</h2>`+
+  a.map(vrow).join('')+(q.length?`<h2>Quote follow-ups</h2>${q.map(qrow).join('')}`:'')+(a.length+q.length?'':'<p class="empty">Nothing planned on this day.</p>');
+}
+function remForm(v,date){
+  const d0=v||{type:'Reminder',status:'Planned',owner:my().ini,date:date||today(),time:'09:00',remind:'0'};
+  modal(v?'Reminder':'New reminder',[{k:'purpose',l:'Remind me to'},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Alert',t:'select',o:REM},{k:'customer',l:'Customer (optional)',dl:1},{k:'notes',l:'Notes',t:'area'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']}],d0,async d=>{
+    d.purpose=d.purpose.trim();d.customer=d.customer.trim();d.type='Reminder';
+    if(!d.purpose)throw Error('Write what you want to be reminded about.');
+    if(!d.date||!d.time)throw Error('Set a date and a time.');
+    if(d.customer)await ensureCust(d.customer);
+    if(d.remind!=='')askNotify();
+    const C=DB.collection('visits');
+    if(v)return C.doc(v.id).update(d);
+    return C.doc('v'+Date.now().toString(36)).set({...d,owner:my().ini,by:UID});
+  },v&&isAdmin()?()=>DB.collection('visits').doc(v.id).delete():null);
+}
+// Alerts while the CRM is open: each planned activity of mine with a reminder pops up once on this device.
+const askNotify=()=>{try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}};
+const remAt=v=>{const d=pd(v.date);if(!d||v.remind==null||v.remind==='')return null;const[h,mi]=(v.time||'09:00').split(':').map(Number);d.setHours(h,mi,0,0);return d.getTime()-Number(v.remind)*6e4};
+function remCheck(){
+  if(!UID||!my())return;const now=Date.now();let seen=[];try{seen=JSON.parse(localStorage.getItem('remSeen')||'[]')}catch(e){}
+  const key=v=>v.id+v.date+v.time+v.remind,v=S.visits.find(v=>v.owner===my().ini&&v.status==='Planned'&&remAt(v)<=now&&now-remAt(v)<864e5&&!seen.includes(key(v)));
+  if(!v)return;seen.push(key(v));try{localStorage.setItem('remSeen',JSON.stringify(seen.slice(-300)))}catch(e){}
+  const txt=`${v.type==='Reminder'?v.purpose:(v.type||'Visit')+' · '+v.customer} · ${v.date===today()?'today':fd(v.date)} ${v.time||''}`,b=$('#toast');
+  b.innerHTML=`<b>⏰ Reminder</b><span>${E(txt)}</span><button class="sb" id="to">Open</button><button class="sb" id="tx">Dismiss</button>`;b.hidden=false;
+  $('#tx').onclick=()=>{b.hidden=true};$('#to').onclick=()=>{b.hidden=true;v.type==='Reminder'?remForm(v):visitForm(v)};
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification('Macfil CRM reminder',{body:txt})}catch(e){}
+}
+setInterval(remCheck,30000);
+// "Add to phone calendar": an .ics file the phone's own calendar imports, with its alarm, so it alerts even when the CRM is closed.
+function ics(v){
+  const p=s=>s.replace(/[-:]/g,''),[h,mi]=(v.time||'09:00').split(':').map(Number),hm=(a,b)=>String(a).padStart(2,'0')+String(b).padStart(2,'0')+'00';
+  const x=s=>String(s||'').replace(/[\\;,]/g,c=>'\\'+c).replace(/\r?\n/g,'\\n'),ti=v.type==='Reminder'?v.purpose:(v.type||'Visit')+': '+v.customer;
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Macfil CRM//EN','BEGIN:VEVENT','UID:'+v.id+'@macfil-crm','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',
+    'DTSTART:'+p(v.date)+'T'+hm(h,mi),'DTEND:'+p(v.date)+'T'+hm(Math.min(h+1,23),h<23?mi:59),'SUMMARY:'+x(ti),v.customer?'LOCATION:'+x(v.customer):'','DESCRIPTION:'+x([v.purpose,v.notes].filter(Boolean).join('\n')),
+    ...(v.remind!=null&&v.remind!==''?['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+x(ti),'TRIGGER:-PT'+Number(v.remind)+'M','END:VALARM']:[]),'END:VEVENT','END:VCALENDAR'].filter(Boolean);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\r\n')],{type:'text/calendar'}));a.download=(ti.replace(/[^\w ]/g,'').trim().slice(0,40)||'activity')+'.ics';document.body.appendChild(a);a.click();a.remove();
+}
 function visitForm(v,pre){
   const d0=v||{type:'Visit',status:'Planned',owner:my().ini,date:today(),...pre};
   let fm;
-  fm=modal(v?(v.type||'Visit')+': '+v.customer:'New activity',[{k:'type',l:'Type',t:'select',o:['Visit','Call','Meeting','Email','Note']},{k:'customer',l:'Customer',dl:1},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'purpose',l:'Subject or purpose'},{k:'owner',l:'Visit owner',t:'select',o:seeAll()?inis(d0.owner):[my().ini]},{k:'quotes',l:'Related quote numbers (e.g. 1617, 1620)'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']},{k:'attendees',l:'Who attended'},{k:'notes',l:'Discussion notes',t:'area'},{k:'outcome',l:'Outcome',t:'area'},{k:'next',l:'Next action, follow-up date',t:'date'},{k:'photos',l:'Photos',t:'file'}],d0,async d=>{
+  fm=modal(v?(v.type||'Visit')+': '+v.customer:'New activity',[{k:'type',l:'Type',t:'select',o:['Visit','Call','Meeting','Email','Note']},{k:'customer',l:'Customer',dl:1},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'purpose',l:'Subject or purpose'},{k:'owner',l:'Visit owner',t:'select',o:seeAll()?inis(d0.owner):[my().ini]},{k:'quotes',l:'Related quote numbers (e.g. 1617, 1620)'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']},{k:'attendees',l:'Who attended'},{k:'notes',l:'Discussion notes',t:'area'},{k:'outcome',l:'Outcome',t:'area'},{k:'next',l:'Next action, follow-up date',t:'date'},{k:'photos',l:'Photos',t:'file'}],d0,async d=>{
     d.customer=d.customer.trim();if(!d.customer)throw Error('Customer is required.');
     if(d.status==='Done'&&!d.notes.trim()&&!d.outcome.trim())throw Error('Add notes or an outcome to report the visit.');
     delete d.photos;const ph=[...(v?.photos||[])],fs=fm.ph;
@@ -210,6 +277,7 @@ function visitForm(v,pre){
     d.photos=ph;await ensureCust(d.customer);
     const C=DB.collection('visits');
     if(v)return C.doc(v.id).update(d);
+    if(d.remind!=='')askNotify();
     return C.doc('v'+Date.now().toString(36)).set({...d,by:UID});
   },v&&isAdmin()?()=>DB.collection('visits').doc(v.id).delete():null);
 }
@@ -244,11 +312,11 @@ function tm(){
 function render(){
   const m=my();
   if(!m||m.active===false)return msg('Your account is waiting for a CRM admin to activate it and set your role. <a href="#" onclick="SB.auth.signOut().then(()=>location.reload());return false">Sign out</a>');
-  const tabs=[['fu','Follow-ups','✓'],['pl','Pipeline','▥'],['qt','Quotes','☰'],['vs','Activities','◷'],['cu','Customers','⌂']];
+  const tabs=[['fu','Follow-ups','✓'],['pl','Pipeline','▥'],['qt','Quotes','☰'],['vs','Activities','◷'],['ca','Calendar','▦'],['cu','Customers','⌂']];
   if(isMgr())tabs.push(['cr','Career','★']);else if(S.career[UID])tabs.push(['cr','My progress','★']);
   if(isAdmin())tabs.push(['tm','Team','⚙']);
   if(!tabs.some(t=>t[0]===S.tab))S.tab='fu';
-  const V={fu,pl,qt,vs:vsc,cu,tm,cr}[S.tab],ti=tabs.find(t=>t[0]===S.tab)[1];
+  const V={fu,pl,qt,vs:vsc,ca:cal,cu,tm,cr}[S.tab],ti=tabs.find(t=>t[0]===S.tab)[1];
   $('#app').innerHTML=`<aside><div class="logo">Macfil CRM</div>${tabs.map(([k,l,i])=>`<button data-t="${k}" class="${k===S.tab?'on':''}"><i>${i}</i><span>${l}</span></button>`).join('')}<div class="me">${E(m.name)}<small>${RL[m.role]}</small></div></aside><div class="shell"><div class="top"><h1>${ti}</h1><button class="so" onclick="SB.auth.signOut().then(()=>location.reload())">Sign out</button><input id="gs" placeholder="Search quotes, press Enter">${(canEdit()||S.tab==='tm')?'<button class="cta" id="add">+ Create</button>':''}</div><main>${V()}</main></div>`;
 }
 
@@ -475,17 +543,21 @@ document.addEventListener('change',e=>{const d=e.target.dataset,id=S.cp;if(!(d.c
   else csave(id,c=>({...c,onb:{...(c.onb||{}),[d.cob]:e.target.checked}}))});
 
 document.addEventListener('click',e=>{
-  if(e.target.closest('.mv,[data-ed]'))return;const t=e.target.closest('[data-t],[data-e],[data-c],[data-s],[data-f],[data-sort],[data-v],[data-vs],[data-act],#add');if(!t||!my())return;
+  if(e.target.closest('.mv,[data-ed]'))return;const t=e.target.closest('[data-t],[data-e],[data-c],[data-s],[data-f],[data-sort],[data-ics],[data-cd],[data-cm],[data-cnew],[data-v],[data-vs],[data-act],#add');if(!t||!my())return;
   if(t.dataset.act)act(t.dataset.act);
+  else if(t.dataset.ics){const v=S.visits.find(x=>x.id===t.dataset.ics);if(v)ics(v)}
+  else if(t.dataset.cd){S.cd=t.dataset.cd;S.cm=t.dataset.cd.slice(0,7);render()}
+  else if(t.dataset.cm){const n=+t.dataset.cm;if(!n){S.cd=today();S.cm=null}else{const[y,m]=(S.cm||(S.cd||today()).slice(0,7)).split('-').map(Number);S.cm=ld(new Date(y,m-1+n,1)).slice(0,7)}render()}
+  else if(t.dataset.cnew){t.dataset.cnew==='rem'?remForm(null,S.cd||today()):visitForm(null,{date:S.cd||today()})}
   else if(t.dataset.sort){const c=t.dataset.sort;S.sort=S.sort.k===c?{k:c,d:-S.sort.d}:{k:c,d:1};$('#list').innerHTML=qlist()}
   else if(t.dataset.t){S.tab=t.dataset.t;render()}
   else if(t.dataset.vs){S.vs=t.dataset.vs;render()}
-  else if(t.dataset.v){const v=S.visits.find(x=>x.id===t.dataset.v);if(v&&canEdit())visitForm(v)}
+  else if(t.dataset.v){const v=S.visits.find(x=>x.id===t.dataset.v);if(v&&canEdit())v.type==='Reminder'?remForm(v):visitForm(v)}
   else if(t.dataset.f){S.scope=t.dataset.f;render()}
   else if(t.dataset.e){const q=S.quotes.find(x=>x.id===t.dataset.e);if(q)quoteView(q)}
   else if(t.dataset.c){const c=S.custs.find(x=>x.id===t.dataset.c);if(c)custView(c)}
   else if(t.dataset.s){if(isAdmin())staffForm(t.dataset.s)}
-  else if(t.id==='add'){S.tab==='cr'&&isMgr()?(S.cp?noteForm(S.cp):alert('To add someone to the programme, use "Add" under "Not in the programme yet" at the bottom of this screen.')):S.tab==='tm'?alert('To add staff: send them this CRM link and ask them to create an account with their work email. They will appear here as Inactive; tap their name to set initials and role, and set Active to yes.'):S.tab==='cu'?custForm():S.tab==='vs'?visitForm():quoteForm()}
+  else if(t.id==='add'){S.tab==='cr'&&isMgr()?(S.cp?noteForm(S.cp):alert('To add someone to the programme, use "Add" under "Not in the programme yet" at the bottom of this screen.')):S.tab==='tm'?alert('To add staff: send them this CRM link and ask them to create an account with their work email. They will appear here as Inactive; tap their name to set initials and role, and set Active to yes.'):S.tab==='cu'?custForm():S.tab==='vs'?visitForm():S.tab==='ca'?visitForm(null,{date:S.cd||today()}):quoteForm()}
 });
 document.addEventListener('input',e=>{if(e.target.id==='srch'){S.q=e.target.value;$('#list').innerHTML=qlist()}});
 let dragId;

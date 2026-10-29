@@ -97,6 +97,7 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 | Customer | One screen with contacts, all quotes, all activities, and quick-add buttons |
 | Quote | One screen with details, checklist and activity timeline |
 | Activities | Planned and Done lists |
+| Calendar | Month view of activities, reminders (activities of type Reminder, with a `remind` field in minutes) and quote follow-up dates; in-app pop-up while open; .ics export for the phone calendar |
 | Team | Admin only |
 
 ## Sales career development

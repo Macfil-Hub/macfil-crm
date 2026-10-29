@@ -1,6 +1,9 @@
 # Macfil CRM: change log
 
 ## 2026-10-29
+- New **Calendar** screen in the side menu: a month view of planned activities, reminders and quote follow-up dates. Tap a day to see its list and add an activity or a reminder for that day. Managers can switch between Mine and Everyone.
+- **Reminders:** add one from the Calendar, or set "Reminder alert" on any activity (at the time, 10 or 30 minutes, 1 hour or 1 day before). While the CRM is open, a pop-up appears at the reminder time. "Add to phone calendar" saves it to the phone's own calendar, which alerts even when the CRM is closed.
+- Fixed: before 8 am, new records were dated the previous day (the app used UTC instead of Malaysia time).
 - Activities: Photos now has two buttons, **Take photo** and **Choose from gallery or files**, so staff can add pictures already on their phone. Chosen photos show as thumbnails and can be removed before saving. Several photos with the same name (common on iPhone) no longer clash.
 - Quotes now use the same **Status** list as the Quotation Summary Excel file: On Going, Quoted, To Revise, Closed, Win, Lost, Declined. It replaces the separate Stage and Outcome fields in the quote form, the Quotes table and its filter.
 - The Pipeline board now has four columns: On Going, Quoted, To Revise and Win.
