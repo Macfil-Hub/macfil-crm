@@ -129,6 +129,14 @@ const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 // Quote status: the same list as the Status column in Macfil Quotation Summary.xlsx
 const ST=['On Going','Quoted','To Revise','Closed','Win','Lost','Declined'];
 const OPEN=['On Going','Quoted','To Revise'],PIPE=[...OPEN,'Win'];
+// Product codes and the common brands, as used in the Quotation Summary Excel. Brand still accepts a rare make typed in.
+const PROD=[['BC','BC – Brook Crompton'],['SP','SP – Sulzer'],['GN','GN – General / other brands'],['NW','NW – Neway']];
+const BRANDS=['Brook','Sulzer','Service','WEG','SEW','GPA','Innomotics','ABB','Neway','Grundfos','MIM','Sumitomo','Siemens','Nord','Regent','Hyosung'];
+const PBRAND={BC:'Brook',SP:'Sulzer',NW:'Neway'};
+const normBrand=b=>{b=(b||'').trim().replace(/\s+/g,' ');if(/^brook\s*crompton$/i.test(b))return 'Brook';return BRANDS.find(x=>x.toLowerCase()===b.toLowerCase())||b};
+const NEEDPRICE=['Quoted','To Revise','Win'];
+// Totals keep RM and USD apart instead of adding them together.
+const money=l=>{const t=c=>l.filter(q=>(q.curr||'RM').trim()===c).reduce((a,q)=>a+(q.price||0),0),u=t('USD');return 'RM '+fmt(t('RM'))+(u?' + USD '+fmt(u):'')};
 const ORD=['','Order placed','Delivered','Invoiced','Paid'];
 const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales / AE'};
 const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{status:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null};
@@ -171,38 +179,39 @@ async function init(){
 }
 
 function qrow(q){
-  const late=oc(q)==='Open'&&q.next&&q.next<today();
-  return `<div class="row ${late?'late':''} ${win(q)?'win':''}" data-e="${q.id}"><div class="l"><b>${E(qno(q))}</b><span>${q.curr||'RM'} ${fmt(q.price)}</span></div><span>${E(q.customer)}</span><small>${E(q.desc)}</small><em>${st(q)}${q.next?' · follow up '+q.next:''}${late?' (overdue)':''}${q.approval==='Pending'?' · approval pending ('+E(q.approver||'?')+')':''}</em></div>`}
+  const late=pre(q)&&q.next&&q.next<today();
+  return `<div class="row ${late?'late':''} ${win(q)?'win':''}" data-e="${q.id}"><div class="l"><b>${E(qno(q))}</b><span>${q.curr||'RM'} ${fmt(q.price)}</span></div><span>${E(q.customer)}</span><small>${E(q.desc)}</small><em>${st(q)}${pre(q)&&q.next?' · follow up '+q.next:''}${late?' (overdue)':''}${q.approval==='Pending'?' · approval pending ('+E(q.approver||'?')+')':''}</em></div>`}
 
 function fu(){
-  const all=visible().filter(pre),sc=seeAll()&&S.scope==='all';
-  const list=(sc?all:all.filter(mine)).sort((a,b)=>(a.next||'9')<(b.next||'9')?-1:1);
-  const od=all.filter(q=>q.next&&q.next<today()).length;
-  const owed=visible().filter(q=>oc(q)==='Open'&&q.order==='Invoiced');
+  // The tiles follow the Mine / Everyone switch, like the list under them.
+  const sc=seeAll()&&S.scope==='all',scope=l=>sc?l:l.filter(mine);
+  const list=scope(visible().filter(pre)).sort((a,b)=>(a.next||'9')<(b.next||'9')?-1:1);
+  const od=list.filter(q=>q.next&&q.next<today()).length;
+  const owed=scope(visible().filter(q=>oc(q)==='Open'&&q.order==='Invoiced'));
   const wk=addDays(7),k=v=>v.status==='Done'?v.next:v.date;
   const vl=vvis().filter(v=>((v.status==='Planned'&&v.date<=wk)||(v.status==='Done'&&v.next&&v.next<=wk))&&(sc||v.owner===my().ini)).sort((a,b)=>(k(a)||'9')<(k(b)||'9')?-1:1);
-  const sum=l=>fmt(l.reduce((a,q)=>a+(q.price||0),0));
-  return careerStrip()+`<div class="kpi"><div><b>${all.length}</b><small>Open quotes</small></div><div><b>${od}</b><small>Overdue follow-ups</small></div><div><b>${sum(all)}</b><small>Pipeline value</small></div><div><b>${sum(owed)}</b><small>Invoiced, to collect</small></div></div>`+
+  return careerStrip()+`<div class="kpi"><div><b>${list.length}</b><small>Open quotes</small></div><div><b>${od}</b><small>Overdue follow-ups</small></div><div><b>${money(list)}</b><small>Pipeline value</small></div><div><b>${money(owed)}</b><small>Invoiced, to collect</small></div></div>`+
   (seeAll()?`<div class="seg"><button data-f="mine" class="${S.scope==='mine'?'on':''}">Mine</button><button data-f="all" class="${S.scope==='all'?'on':''}">Everyone</button></div>`:'')+
   (vl.length?`<h2>Activities due<small>next 7 days</small></h2>${vl.map(vrow).join('')}`:'')+
   `<h2>Quote follow-ups</h2>`+(list.length?list.map(qrow).join(''):'<p class="empty">No open quotes to follow up. Tap Create to add one.</p>');
 }
 function card(q){
-  return `<div class="card" draggable="${canEdit()}" data-e="${q.id}" data-id="${q.id}"><b>${E(q.customer)}</b><span>${E(q.desc)}</span><div class="l"><em>${q.curr||'RM'} ${fmt(q.price)}</em><small>${E(q.sales||'')}${q.ae?' / '+E(q.ae):''}</small></div>${q.next&&q.next<today()?'<small class="od">Overdue '+q.next+'</small>':''}${canEdit()?`<select class="mv" data-mv="${q.id}">${ST.map(s=>`<option${s===st(q)?' selected':''}>${E(s)}</option>`).join('')}</select>`:''}</div>`}
+  return `<div class="card" draggable="${canEdit()}" data-e="${q.id}" data-id="${q.id}"><b>${E(q.customer)}</b><span>${E(q.desc)}</span><div class="l"><em>${q.curr||'RM'} ${fmt(q.price)}</em><small>${E(q.sales||'')}${q.ae?' / '+E(q.ae):''}</small></div>${pre(q)&&q.next&&q.next<today()?'<small class="od">Overdue '+q.next+'</small>':''}${canEdit()?`<select class="mv" data-mv="${q.id}">${ST.map(s=>`<option${s===st(q)?' selected':''}>${E(s)}</option>`).join('')}</select>`:''}</div>`}
 function pl(){
   const op=visible();
   return `<div class="board">${PIPE.map(s=>{const l=op.filter(q=>st(q)===s);
-    return `<section class="col" data-stage="${s}"><h4>${s}<small>${l.length}</small></h4><div class="tot">RM ${fmt(l.reduce((a,q)=>a+(q.price||0),0))}</div>${l.map(card).join('')}</section>`}).join('')}</div>`;
+    return `<section class="col" data-stage="${s}"><h4>${s}<small>${l.length}</small></h4><div class="tot">${money(l)}</div>${l.map(card).join('')}</section>`}).join('')}</div>`;
 }
 function qt(){
   const f=S.fl,sel=(k,n,o)=>`<select data-fl="${k}"><option value="">${n}</option>${o.filter(Boolean).map(x=>`<option${x===f[k]?' selected':''}>${E(x)}</option>`).join('')}</select>`;
   return `<div class="filters"><input id="srch" placeholder="Search customer, description, number" value="${E(S.q)}">${sel('status','All statuses',ST)}${sel('owner','All owners',inis())}${sel('product','All products',[...new Set(visible().map(q=>q.product))].sort())}</div><div class="tw" id="list">${qlist()}</div>`}
 function qlist(){
   const t=S.q.toLowerCase(),f=S.fl,k=S.sort.k,ce=canEdit(),sel=(id,fl,o,val)=>`<select data-ed="${id}:${fl}">${o.map(x=>`<option${x===val?' selected':''}>${E(x)}</option>`).join('')}</select>`;
-  const l=visible().filter(q=>(!t||(qno(q)+q.customer+q.desc).toLowerCase().includes(t))&&(!f.status||st(q)===f.status)&&(!f.owner||q.sales===f.owner||q.ae===f.owner)&&(!f.product||q.product===f.product))
+  const l=visible().filter(q=>(!t||(qno(q)+q.customer+q.desc+(q.brand||'')+(q.remark||'')).toLowerCase().includes(t))&&(!f.status||st(q)===f.status)&&(!f.owner||q.sales===f.owner||q.ae===f.owner)&&(!f.product||q.product===f.product))
     .sort((a,b)=>{const x=k==='status'?ST.indexOf(st(a)):(a[k]??''),y=k==='status'?ST.indexOf(st(b)):(b[k]??'');return(x>y?1:x<y?-1:0)*S.sort.d});
-  const H=[['seq','No.'],['customer','Customer'],['desc','Description'],['price','Value'],['product','Product'],['sales','Sales'],['ae','AE'],['status','Status'],['order','Order'],['next','Follow-up']];
-  return `<p class="cnt">${l.length} quotes · RM ${fmt(l.reduce((a,q)=>a+(q.price||0),0))}</p><table><thead><tr>${H.map(([c,n])=>`<th data-sort="${c}">${n}${k===c?(S.sort.d>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${l.slice(0,200).map(q=>`<tr data-e="${q.id}"><td>${q.seq}</td><td>${E(q.customer)}</td><td>${E(q.desc)}</td><td>${ce?`<input type="number" data-ed="${q.id}:price" value="${q.price||0}">`:(q.curr||'RM')+' '+fmt(q.price)}</td><td>${E(q.product)}</td><td>${E(q.sales)}</td><td>${E(q.ae)}</td><td>${ce?sel(q.id,'status',ST,st(q)):st(q)}</td><td>${ce?sel(q.id,'order',ORD,q.order||''):E(q.order)}</td><td class="${oc(q)==='Open'&&q.next&&q.next<today()?'late':''}">${ce?`<input type="date" data-ed="${q.id}:next" value="${q.next||''}">`:(q.next||'')}</td></tr>`).join('')}</tbody></table>${l.length>200?'<p class="cnt">Showing first 200. Narrow with filters.</p>':''}`;
+  const H=[['seq','No.'],['date','Inq Date'],['customer','Customer'],['desc','Description'],['price','Value'],['product','Product'],['brand','Brand'],['sales','Sales'],['ae','AE'],['status','Status'],['order','Order'],['next','Follow-up'],['remark','Remark']];
+  const rmk=s=>(s=s||'').length>60?E(s.slice(0,60))+'…':E(s);
+  return `<p class="cnt">${l.length} quotes · ${money(l)}</p><table><thead><tr>${H.map(([c,n])=>`<th data-sort="${c}">${n}${k===c?(S.sort.d>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${l.slice(0,200).map(q=>`<tr data-e="${q.id}"><td>${q.seq}</td><td class="nw">${fd(q.date)}</td><td>${E(q.customer)}</td><td>${E(q.desc)}</td><td class="nw">${ce?`${q.curr==='USD'?'USD ':''}<input type="number" data-ed="${q.id}:price" value="${q.price||0}">`:(q.curr||'RM')+' '+fmt(q.price)}</td><td>${E(q.product)}</td><td>${E(q.brand)}</td><td>${E(q.sales)}</td><td>${E(q.ae)}</td><td>${ce?sel(q.id,'status',ST,st(q)):st(q)}</td><td>${ce?sel(q.id,'order',ORD,q.order||''):E(q.order)}</td><td class="${pre(q)&&q.next&&q.next<today()?'late':''}">${!pre(q)?'':ce?`<input type="date" data-ed="${q.id}:next" value="${q.next||''}">`:(q.next||'')}</td><td class="rmk" title="${E(q.remark)}">${rmk(q.remark)}</td></tr>`).join('')}</tbody></table>${l.length>200?'<p class="cnt">Showing first 200. Narrow with filters.</p>':''}`;
 }
 function vrow(v){
   const late=v.status==='Planned'&&v.date<today(),ph=v.photos||[];
@@ -286,7 +295,7 @@ const linked=q=>S.visits.filter(v=>(v.quotes||'').split(/[\s,;]+/).includes(Stri
 const chk=x=>x==='Done'?'✓':x==='N/A'?'–':'○';
 function quoteView(q){
   const acts=linked(q).sort((a,b)=>a.date<b.date?1:-1);
-  sheet(`<h3>${E(qno(q))}</h3><p><b>${E(q.customer)}</b><br>${E(q.desc)}</p><p class="cnt">${q.curr||'RM'} ${fmt(q.price)} · ${st(q)}${q.order?' · '+E(q.order):''}${q.next?' · follow up '+q.next:''}</p><p class="cnt">${chk(q.cTech)} Technical review · ${chk(q.cCost)} Cost known · ${chk(q.cMargin)} Margin checked · Approval: ${E(q.approval||'Not needed')}${q.approver?' ('+E(q.approver)+')':''}</p>${canEdit()?`<div class="btns"><button type="button" data-act="eq:${q.id}">Edit quote</button><button type="button" data-act="na:${q.id}">+ Activity</button></div>`:''}<div id="ai" class="cnt" style="white-space:pre-wrap"></div><h2>Timeline<small>${acts.length}</small></h2>${acts.map(vrow).join('')||'<p class="empty">No activities linked yet.</p>'}`)}
+  sheet(`<h3>${E(qno(q))}</h3><p><b>${E(q.customer)}</b><br>${E(q.desc)}</p><p class="cnt">${q.curr||'RM'} ${fmt(q.price)} · ${st(q)}${q.order?' · '+E(q.order):''}${pre(q)&&q.next?' · follow up '+q.next:''}${q.brand?' · '+E(q.brand):''}</p>${q.remark?`<p class="cnt">${E(q.remark)}</p>`:''}<p class="cnt">${chk(q.cTech)} Technical review · ${chk(q.cCost)} Cost known · ${chk(q.cMargin)} Margin checked · Approval: ${E(q.approval||'Not needed')}${q.approver?' ('+E(q.approver)+')':''}</p>${canEdit()?`<div class="btns"><button type="button" data-act="eq:${q.id}">Edit quote</button><button type="button" data-act="na:${q.id}">+ Activity</button></div>`:''}<div id="ai" class="cnt" style="white-space:pre-wrap"></div><h2>Timeline<small>${acts.length}</small></h2>${acts.map(vrow).join('')||'<p class="empty">No activities linked yet.</p>'}`)}
 function custView(c){
   const qs=visible().filter(q=>q.customer===c.name).sort((a,b)=>b.seq-a.seq),as=vvis().filter(v=>v.customer===c.name).sort((a,b)=>a.date<b.date?1:-1);
   sheet(`<h3>${E(c.name)}</h3><p class="cnt">${E(c.contact)} ${E(c.phone)} ${E(c.email)}</p>${canEdit()?`<div class="btns"><button type="button" data-act="ec:${c.id}">Edit</button><button type="button" data-act="nq:${c.id}">+ Quote</button><button type="button" data-act="nc:${c.id}">+ Activity</button></div>`:''}<div id="ai" class="cnt" style="white-space:pre-wrap"></div><h2>Quotes<small>${qs.length} · RM ${fmt(qs.reduce((a,q)=>a+(q.price||0),0))}</small></h2>${qs.map(qrow).join('')}<h2>Activities<small>${as.length}</small></h2>${as.map(vrow).join('')}`)}
@@ -324,7 +333,7 @@ function modal(title,F,v,save,del){
   const el=$('#modal');el.hidden=false;
   // Photos: two pickers, because some phones open only the camera for a single image picker.
   const pk=f=>`<div class="lb">${f.l}<div class="pk"><label class="sb">Take photo<input type="file" accept="image/*" capture="environment"></label><label class="sb">Choose from gallery or files<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif"></label></div><div class="pv"></div></div>`;
-  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>f.t==='file'?pk(f):`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.dl?' list="cl"':''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
+  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>f.t==='file'?pk(f):`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.dl?` list="${f.dl===1?'cl':f.dl}"`:''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><datalist id="brl">${BRANDS.map(b=>`<option value="${b}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
   const fm=el.firstChild;
   // Chosen photos collect in fm.ph (camera shots add up one by one); thumbnails can be removed before saving.
   fm.ph=[];const pv=fm.querySelector('.pv');
@@ -342,7 +351,7 @@ function quoteForm(q,cu){
   modal(q?'Edit '+qno(q):'New quotation',[
     {k:'customer',l:'Customer',dl:1},{k:'desc',l:'Description',t:'area'},
     {k:'curr',l:'Currency',t:'select',o:['RM','USD']},{k:'price',l:'Price',t:'number'},
-    {k:'product',l:'Product code (e.g. BC, GN, SP)'},{k:'brand',l:'Brand'},
+    {k:'product',l:'Product code',t:'select',o:[['','Choose'],...PROD,...(v.product&&!PROD.some(p=>p[0]===v.product)?[[v.product,v.product]]:[])]},{k:'brand',l:'Brand (pick from the list, or type a rare make)',dl:'brl'},
     {k:'sales',l:'Sales',t:'select',o:inis(v.sales)},{k:'ae',l:'AE',t:'select',o:inis(v.ae)},
     {k:'status',l:'Status',t:'select',o:ST},{k:'approval',l:'Approval',t:'select',o:['Not needed','Pending','Approved','Rejected']},{k:'approver',l:'Approver (choose per deal)',t:'select',o:inis(v.approver)},{k:'cTech',l:'Technical review',t:'select',o:['Pending','Done','N/A']},{k:'cCost',l:'Supplier or stock cost known',t:'select',o:['Pending','Done','N/A']},{k:'cMargin',l:'Margin checked',t:'select',o:['Pending','Done','N/A']},{k:'rev',l:'Revision number (0 = original)',t:'number'},{k:'order',l:'Order status (after PO)',t:'select',o:[['','Not yet'],...ORD.slice(1)]},
     {k:'reason',l:'Reason (for Closed, Lost or Declined)'},{k:'next',l:'Next follow-up',t:'date'},{k:'remark',l:'Remark',t:'area'}],
@@ -356,6 +365,8 @@ async function saveQ(d,q){
   d.price=Number(d.price)||0;d.customer=d.customer.trim();
   if(!d.customer)throw Error('Customer is required.');
   if(!q&&!seeAll()&&!mine(d))throw Error('You must be the Sales or AE on your own quotes. Choose your initials in one of them.');
+  if(NEEDPRICE.includes(d.status)&&!d.price)throw Error(`Enter the price before setting the status to ${d.status}.`);
+  d.brand=normBrand(d.brand)||PBRAND[d.product]||'';
   if(d.status==='Quoted'&&(!q||st(q)!=='Quoted'))d.next=addDays(3);d.rev=Number(d.rev)||0;
   if(d.status==='Win'&&(!q||st(q)!=='Win'))d.won=today();
   await ensureCust(d.customer);
@@ -561,7 +572,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{if(e.target.id==='srch'){S.q=e.target.value;$('#list').innerHTML=qlist()}});
 let dragId;
-async function moveQ(id,status){const q=S.quotes.find(x=>x.id===id);if(!q||!canEdit()||st(q)===status||(!seeAll()&&!mine(q)))return;const u={status};if(status==='Quoted')u.next=addDays(3);if(status==='Win')u.won=today();await DB.collection('quotes').doc(id).update(u)}
+async function moveQ(id,status){const q=S.quotes.find(x=>x.id===id);if(!q||!canEdit()||st(q)===status||(!seeAll()&&!mine(q)))return;if(NEEDPRICE.includes(status)&&!q.price){alert(`Enter the price for ${qno(q)} before setting it to ${status}.`);render();return}const u={status};if(status==='Quoted')u.next=addDays(3);if(status==='Win')u.won=today();await DB.collection('quotes').doc(id).update(u)}
 document.addEventListener('dragstart',e=>{const c=e.target.closest('.card');if(c){dragId=c.dataset.id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragId)}});
 document.addEventListener('dragover',e=>{const c=e.target.closest('.col');if(c&&dragId){e.preventDefault();c.classList.add('over')}});
 document.addEventListener('dragleave',e=>{const c=e.target.closest('.col');if(c&&!c.contains(e.relatedTarget))c.classList.remove('over')});

@@ -1,6 +1,12 @@
 # Macfil CRM: change log
 
 ## 2026-10-29
+- Follow-ups: the four tiles at the top now follow the Mine / Everyone switch, like the list below them.
+- Quotes: **Product code** is now a list (BC Brook Crompton, SP Sulzer, GN General, NW Neway). **Brand** suggests the common brands and tidies spelling when saved (for example "BROOK CROMPTON" becomes "Brook"); if left empty it is filled from the product code.
+- Quotes: a price is required before the status can be Quoted, To Revise or Win.
+- Quotes: follow-up dates are hidden on closed quotes (Win, Closed, Lost, Declined), so they no longer show as overdue.
+- Quotes table: new **Inq Date**, **Brand** and **Remark** columns, matching the Excel. Search also looks in brand and remark.
+- Totals now show RM and USD separately instead of adding them together.
 - New **Calendar** screen in the side menu: a month view of planned activities, reminders and quote follow-up dates. Tap a day to see its list and add an activity or a reminder for that day. Managers can switch between Mine and Everyone.
 - **Reminders:** add one from the Calendar, or set "Reminder alert" on any activity (at the time, 10 or 30 minutes, 1 hour or 1 day before). While the CRM is open, a pop-up appears at the reminder time. "Add to phone calendar" saves it to the phone's own calendar, which alerts even when the CRM is closed.
 - Fixed: before 8 am, new records were dated the previous day (the app used UTC instead of Malaysia time).
