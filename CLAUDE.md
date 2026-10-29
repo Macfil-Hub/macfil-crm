@@ -57,7 +57,14 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 1. Enquiries land with the salesperson. The salesperson or sales support logs the enquiry, and the quote number is issued immediately.
 2. Quote number format: `MF26-{seq}-{product}-{sales}-{ae}`, plus `-R1`, `-R2` for revisions.
    - `seq` comes from the database sequence and continues from 1617.
-3. Pipeline stages, each with an owner and a "done when" rule:
+3. **Quote Status (since 29 Oct 2026):** one Status field with exactly the list from `Macfil_Quotation_Summary.xlsx` (DATA sheet): On Going, Quoted, To Revise, Closed, Win, Lost, Declined.
+   - Open: On Going, Quoted, To Revise. The pipeline board columns are these plus Win.
+   - Closed = the enquiry closed with no result (not lost to a competitor). It is not counted in conversion.
+   - Quoted sets the follow-up to 3 days later. Win records the won date.
+   - Older quotes saved with `stage`/`outcome` are read through `st(q)` in index.html (Cancelled → Closed, Revision → To Revise, Won → Win, earlier stages → On Going).
+   - The stage table below is the original working agreement; the technical, sourcing and pricing steps now live in the quote checklist.
+
+   Original pipeline stages, each with an owner and a "done when" rule:
 
 | Stage | Owner | Done when |
 | --- | --- | --- |
@@ -110,7 +117,7 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 3. **Excel import** of `Macfil_Quotation_Summary.xlsx`, sheet `2026`:
    - Contents: 618 quotes, No. 1000 to 1616. Columns: No., Inq Date, Customer, Description, Curr, Price, Product, Brand, Sales, AE, Status, Remark.
    - Clean-up: merge duplicate customer names (for example "Palm Oleo" and "Palm-Oleo"), trim initials, and skip "KIV" placeholder rows.
-   - Old statuses (On Going, Quoted, To Revise, Closed, Win, Lost, Declined) must be mapped to the new stages and outcomes. Propose a mapping and confirm it with Wong before importing.
+   - The Excel Status values now import one to one into the CRM Status field (same list).
 4. **Word (.docx) quotation** generated from a quote, in Macfil's format. Ask Wong for a sample quotation.
 5. **Email logging from Outlook / Microsoft 365.** This is blocked until the company's M365 admin approves the connection.
 6. **AI meeting summaries and pre-visit customer briefs** through a server-side function calling the Claude API. The API key must never be in the browser.
