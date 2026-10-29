@@ -1,6 +1,7 @@
 # Macfil CRM: change log
 
 ## 2026-10-29
+- Activities: Photos now has two buttons, **Take photo** and **Choose from gallery or files**, so staff can add pictures already on their phone. Chosen photos show as thumbnails and can be removed before saving. Several photos with the same name (common on iPhone) no longer clash.
 - Quotes now use the same **Status** list as the Quotation Summary Excel file: On Going, Quoted, To Revise, Closed, Win, Lost, Declined. It replaces the separate Stage and Outcome fields in the quote form, the Quotes table and its filter.
 - The Pipeline board now has four columns: On Going, Quoted, To Revise and Win.
 - Existing quotes keep their position: Won becomes Win, Revision becomes To Revise, Cancelled becomes Closed, and the early stages become On Going.

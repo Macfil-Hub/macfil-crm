@@ -71,7 +71,12 @@ td.late{color:var(--warn);font-weight:600}
 aside{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;flex-direction:row;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));z-index:6}
 aside .logo,aside .me{display:none}aside button{flex:1;flex-direction:column;gap:2px;font-size:11px;padding:6px 2px;border-left:0;border-top:3px solid transparent;justify-content:center;align-items:center}
 aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margin-left:auto}.col{width:78vw}}
-.ph{width:72px;height:72px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0}td select,td input{padding:4px 6px;font-size:13px;width:auto;min-width:90px}.lg{max-width:380px;margin:10vh auto;padding:24px;display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;width:calc(100% - 32px)}.lg h1{margin:0 0 4px}.lg a{color:var(--acc);font-size:14px}.so{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;flex:none}.empty a{color:var(--acc)}
+.ph{width:72px;height:72px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0}
+.lb{font-size:14px;color:var(--mut);margin-bottom:10px}
+.pk{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}.pk label{position:relative;margin:0;padding:10px 14px;font-size:15px;color:var(--ink);cursor:pointer}
+.pk input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+.pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.pt{position:relative}.pt img{width:72px;height:72px;object-fit:cover;border-radius:6px;display:block;background:var(--line)}
+.pt button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--warn);color:#fff;font-size:16px;line-height:1;padding:0;cursor:pointer}td select,td input{padding:4px 6px;font-size:13px;width:auto;min-width:90px}.lg{max-width:380px;margin:10vh auto;padding:24px;display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;width:calc(100% - 32px)}.lg h1{margin:0 0 4px}.lg a{color:var(--acc);font-size:14px}.so{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;flex:none}.empty a{color:var(--acc)}
 /* Career development */
 .pn{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px}.pn>h2:first-child{margin-top:0}.pn.warn{border-color:var(--warn)}.pn.hi{border-color:#ff7a59}
 .g2{display:grid;gap:0 12px}@media(min-width:900px){.g2{grid-template-columns:1fr 1fr}}
@@ -200,8 +205,8 @@ function visitForm(v,pre){
   fm=modal(v?(v.type||'Visit')+': '+v.customer:'New activity',[{k:'type',l:'Type',t:'select',o:['Visit','Call','Meeting','Email','Note']},{k:'customer',l:'Customer',dl:1},{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'purpose',l:'Subject or purpose'},{k:'owner',l:'Visit owner',t:'select',o:seeAll()?inis(d0.owner):[my().ini]},{k:'quotes',l:'Related quote numbers (e.g. 1617, 1620)'},{k:'status',l:'Status',t:'select',o:['Planned','Done','Cancelled']},{k:'attendees',l:'Who attended'},{k:'notes',l:'Discussion notes',t:'area'},{k:'outcome',l:'Outcome',t:'area'},{k:'next',l:'Next action, follow-up date',t:'date'},{k:'photos',l:'Photos',t:'file'}],d0,async d=>{
     d.customer=d.customer.trim();if(!d.customer)throw Error('Customer is required.');
     if(d.status==='Done'&&!d.notes.trim()&&!d.outcome.trim())throw Error('Add notes or an outcome to report the visit.');
-    delete d.photos;const ph=[...(v?.photos||[])],fs=[...fm.photos.files];
-    if(fs.length){for(const f of fs){const p=UID+'/'+Date.now()+'-'+f.name.replace(/[^\w.]/g,'');const{error}=await SB.storage.from('photos').upload(p,f);if(error)throw error;ph.push(p)}}
+    delete d.photos;const ph=[...(v?.photos||[])],fs=fm.ph;
+    if(fs.length){for(const[i,f]of fs.entries()){const p=UID+'/'+Date.now()+'-'+i+'-'+f.name.replace(/[^\w.]/g,'');const{error}=await SB.storage.from('photos').upload(p,f);if(error)throw error;ph.push(p)}}
     d.photos=ph;await ensureCust(d.customer);
     const C=DB.collection('visits');
     if(v)return C.doc(v.id).update(d);
@@ -249,8 +254,14 @@ function render(){
 
 function modal(title,F,v,save,del){
   const el=$('#modal');el.hidden=false;
-  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.dl?' list="cl"':''}${f.t==='file'?' multiple accept="image/*"':''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
+  // Photos: two pickers, because some phones open only the camera for a single image picker.
+  const pk=f=>`<div class="lb">${f.l}<div class="pk"><label class="sb">Take photo<input type="file" accept="image/*" capture="environment"></label><label class="sb">Choose from gallery or files<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif"></label></div><div class="pv"></div></div>`;
+  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>f.t==='file'?pk(f):`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.dl?' list="cl"':''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
   const fm=el.firstChild;
+  // Chosen photos collect in fm.ph (camera shots add up one by one); thumbnails can be removed before saving.
+  fm.ph=[];const pv=fm.querySelector('.pv');
+  const showPh=()=>{pv.innerHTML=fm.ph.map((f,k)=>`<span class="pt"><img src="${URL.createObjectURL(f)}" alt="${E(f.name)}"><button type="button" data-rm="${k}" aria-label="Remove photo">×</button></span>`).join('')};
+  if(pv){fm.querySelectorAll('input[type=file]').forEach(i=>i.onchange=()=>{fm.ph.push(...i.files);i.value='';showPh()});pv.onclick=e=>{const k=e.target.dataset.rm;if(k!=null){fm.ph.splice(+k,1);showPh()}}}
   $('#x').onclick=()=>{el.hidden=true};
   if(del)$('#del').onclick=async()=>{if(confirm('Delete this record?')){await del();el.hidden=true}};
   fm.onsubmit=async e=>{e.preventDefault();try{await save(Object.fromEntries(new FormData(fm)));el.hidden=true}catch(x){alert('Could not save: '+(x.message||x))}};
