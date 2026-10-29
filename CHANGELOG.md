@@ -1,13 +1,13 @@
 # Macfil CRM: change log
 
-## Sales career development (branch `career-development`, not live yet)
+## 2026-10-29: Sales career development
 - New **Career** screen for managers: who is Ready, Developing, Early stage or At risk; who needs a check-in; a roster with each person's quotes, conversion and orders won; and settings for targets and training per career level.
 - New **My progress** screen for salespeople in the programme: readiness checklist, KPIs, training, feedback notes and quarterly ratings. A short progress line also appears at the top of Follow-ups.
 - KPIs (quotes issued, conversion, new customers, orders won, repeat business, activities done) are worked out from the CRM itself, so nobody types them in. Tap a KPI to see the quotes behind it.
 - Managers add feedback notes with development actions, record quarterly reviews (rating, recommendation, MD decision and reason), tick onboarding steps and update training.
 - Privacy: each person sees only their own career page and never sees promotion or salary decisions. Finance and sales support do not see career records.
 - Quotes now remember the date they were won, and new customers remember the date they were added, so KPIs are accurate from now on.
-- To switch it on: run `setup_career.sql` once in Supabase. Until then the CRM works as before and the Career screen shows a short notice.
+- Database: `setup_career.sql` has been run in Supabase (adds the `career` and `career_settings` tables).
 
 ## 2026-10-28
 - Project folder prepared for GitHub: the prototype page is now called `index.html` (GitHub Pages needs this name).
