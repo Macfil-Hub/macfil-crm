@@ -1,5 +1,8 @@
 # Macfil CRM: change log
 
+## 2026-10-29
+- Fixed: on phones, the bottom menu covered the Save and Cancel buttons on forms.
+
 ## 2026-10-29: Sales career development
 - New **Career** screen for managers: who is Ready, Developing, Early stage or At risk; who needs a check-in; a roster with each person's quotes, conversion and orders won; and settings for targets and training per career level.
 - New **My progress** screen for salespeople in the programme: readiness checklist, KPIs, training, feedback notes and quarterly ratings. A short progress line also appears at the top of Follow-ups.
