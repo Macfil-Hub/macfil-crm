@@ -1,5 +1,10 @@
 # Macfil CRM: change log
 
+## 2026-10-30
+- Quotes: setting a quote to **Closed, Lost or Declined** now needs a reason from a list (Price, Technical scope, Slow response, Delivery time, Competitor brand, Customer cancelled, Other). The old text box is kept for details. Choosing one of these statuses on the board or in the table opens the quote so the reason can be picked.
+- Career: new **Why deals were lost** panel on each person's page and on the team page (last 90 days), with the training or action that would help most.
+- Career: managers can **Book check-in** on a person's page. It goes into the manager's Calendar with a reminder, the salesperson sees the booked date on My progress, and the roster shows it. Saving a "Monthly check-in" note on or after that date closes the booking and marks the calendar entry Done.
+
 ## 2026-10-29
 - Follow-ups: the four tiles at the top now follow the Mine / Everyone switch, like the list below them.
 - Quotes: **Product code** is now a list (BC Brook Crompton, SP Sulzer, GN General, NW Neway). **Brand** suggests the common brands and tidies spelling when saved (for example "BROOK CROMPTON" becomes "Brook"); if left empty it is filled from the product code.

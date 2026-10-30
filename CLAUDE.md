@@ -107,6 +107,8 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 - KPIs are computed in the browser from quotes (Sales or AE), customers and activities. Won date is the quote's `won` field (set when the stage becomes Won), falling back to the quote date.
 - Readiness: Ready = at least 75% of KPI targets met, all training passed, and a manager note or review in the last 92 days. Developing = at least 50% of each. At risk = longer than expected at the level with no review in 92 days.
 - Default targets and training modules are drafts; Wong confirms them under Programme settings.
+- Lost reasons: quotes carry `why` (one of LOSTR in index.html) when Closed, Lost or Declined; `lostPanel()` groups the last 90 days by reason.
+- Check-ins: `career.checkin` = {date, time, remind, notes, by, vid}; `vid` is a visits record of type `Check-in` with `careerOf` = staff id, owned by the manager. A Monthly check-in note dated on or after the booking clears it and marks the visit Done.
 
 ## Backlog (in this order)
 1. **Deploy the prototype.** Set up the GitHub repo, GitHub Pages and the Supabase project. Run `setup.sql`. Test RLS with one test user per role.
