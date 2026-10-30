@@ -35,6 +35,7 @@ A CRM modelled on Translead CRM (Japanese CRM/SFA):
 Additional rules:
 - New sign-ups start inactive. The first sign-up becomes the admin manager.
 - Admins set initials, role, admin and active status in the Team screen.
+- MD: a manager with `md: true` on their staff record (Team screen). `canDecide()` = the MD, or any manager while no MD is set. MD decisions (promotions, review MD decision) are limited in the app only; the database still lets any manager write career records.
 
 ## Team
 | Initials | Name | Title |

@@ -1,6 +1,7 @@
 # Macfil CRM: change log
 
 ## 2026-10-30
+- New **MD** setting in Team (for a Manager). The MD has a **Waiting for your MD decision** list at the top of Follow-ups. Only the MD can approve or decline promotions and quarterly-review recommendations; other managers can recommend and set "Pending MD". Until an MD is set, any manager can record the decision, as before.
 - Career: **promotion record**. A manager taps **Recommend promotion** (on Career history, or in the readiness box when someone is Ready) and writes why. It shows as "Promotion decision pending" on the Career team page. **Record MD decision** sets Approved or Declined with who decided and why. An approval moves the person to the new level on the effective date, with that level's KPIs, training and expected months.
 - Career: new **Career history** timeline on each person's page: start level, recommendations, decisions and promotions. Salespeople see only their start and approved promotions.
 - Career: new **KPI trend** panel on each person's page and on My progress: a small bar chart per KPI for the last 6 months (4 quarters for new customers), green when the target was met, with the target as a dashed line. Hover or tap a bar for its value.
