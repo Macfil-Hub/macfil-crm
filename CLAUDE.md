@@ -108,6 +108,7 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 - Readiness: Ready = at least 75% of KPI targets met, all training passed, and a manager note or review in the last 92 days. Developing = at least 50% of each. At risk = longer than expected at the level with no review in 92 days.
 - Default targets and training modules are drafts; Wong confirms them under Programme settings.
 - Lost reasons: quotes carry `why` (one of LOSTR in index.html) when Closed, Lost or Declined; `lostPanel()` groups the last 90 days by reason.
+- Promotions: `career.promos` = [{id, from, to, fromStart, date, by, reason, status pending|approved|declined, decBy, decDate, decReason, effective}]; approval sets level, start = effective, range and clears targets. Staff see approved entries only (UI-level; the row itself is readable by its owner).
 - Check-ins: `career.checkin` = {date, time, remind, notes, by, vid}; `vid` is a visits record of type `Check-in` with `careerOf` = staff id, owned by the manager. A Monthly check-in note dated on or after the booking clears it and marks the visit Done.
 
 ## Backlog (in this order)

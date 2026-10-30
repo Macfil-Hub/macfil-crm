@@ -1,6 +1,8 @@
 # Macfil CRM: change log
 
 ## 2026-10-30
+- Career: **promotion record**. A manager taps **Recommend promotion** (on Career history, or in the readiness box when someone is Ready) and writes why. It shows as "Promotion decision pending" on the Career team page. **Record MD decision** sets Approved or Declined with who decided and why. An approval moves the person to the new level on the effective date, with that level's KPIs, training and expected months.
+- Career: new **Career history** timeline on each person's page: start level, recommendations, decisions and promotions. Salespeople see only their start and approved promotions.
 - Career: new **KPI trend** panel on each person's page and on My progress: a small bar chart per KPI for the last 6 months (4 quarters for new customers), green when the target was met, with the target as a dashed line. Hover or tap a bar for its value.
 - Career: **Book check-in** now starts with a ready-made agenda (KPIs, open quotes, lost reasons, training, last actions, new actions), which the manager can edit.
 - Quotes: setting a quote to **Closed, Lost or Declined** now needs a reason from a list (Price, Technical scope, Slow response, Delivery time, Competitor brand, Customer cancelled, Other). The old text box is kept for details. Choosing one of these statuses on the board or in the table opens the quote so the reason can be picked.
