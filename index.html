@@ -152,7 +152,7 @@ const LOSTHINT={'Price':'Negotiation and pricing coaching; check margin before q
 const money=l=>{const t=c=>l.filter(q=>(q.curr||'RM').trim()===c).reduce((a,q)=>a+(q.price||0),0),u=t('USD');return 'RM '+fmt(t('RM'))+(u?' + USD '+fmt(u):'')};
 const ORD=['','Order placed','Delivered','Invoiced','Paid'];
 const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales / AE'};
-const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{status:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null};
+const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{status:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null,dec:{},decOK:false};
 let DB,U,UID;
 const today=()=>ld();
 const my=()=>S.staff[UID];
@@ -189,6 +189,7 @@ async function init(){
   DB.collection('visits').onSnapshot(s=>{S.visits=s.docs.map(d=>({id:d.id,...d.data()}));render();remCheck()});
   DB.collection('career').onSnapshot(s=>{S.career={};S.cOK=true;s.docs.forEach(d=>S.career[d.id]=d.data());render()});
   DB.collection('career_settings').onSnapshot(s=>{const m=s.docs.find(d=>d.id==='main');S.cset=m?m.data():null;render()});
+  DB.collection('career_decisions').onSnapshot(s=>{S.dec={};S.decOK=true;s.docs.forEach(d=>S.dec[d.id]={id:d.id,...d.data()});render()});
 }
 
 function qrow(q){
@@ -500,40 +501,46 @@ function spark(r,ini){const D=trendData(ini,r.k),W=260,H=100,pt=18,pb=18,mx=Math
 const trendPanel=(rows,ini)=>{const R=rows.filter(r=>!r.mgr);return R.length?`<div class="pn"><h2>KPI trend<small>last 6 months · this month so far</small></h2><div class="tgrid">${R.map(r=>spark(r,ini)).join('')}</div><small class="cnt">Green bars met the target, orange bars are below it, and the dashed line is the target. Rates cover the 90 days (or 12 months) up to each month. Hover or tap a bar for its value.</small></div>`:''};
 // Default agenda for a new check-in booking; the manager can edit it.
 const CKAGENDA='1. KPIs this month\n2. Open quotes and overdue follow-ups\n3. Why deals were lost\n4. Next training module and assessment date\n5. Last actions: done?\n6. Agree 1–2 new actions';
+// Private decisions live in the career_decisions table, which only managers can read (setup_career_private.sql):
+// kind 'promo' = {from, to, fromStart, date, by, reason, status: pending|approved|declined, decBy, decDate, decReason, effective}
+// kind 'review' = {rec, md, reason} for the career.reviews entry with the same id. Both carry staff = the staff id.
+const decs=(id,k)=>Object.values(S.dec).filter(d=>d.staff===id&&d.kind===k);
+const pendingPromo=id=>decs(id,'promo').find(p=>p.status==='pending');
+const ddoc=id=>DB.collection('career_decisions').doc(id);
+const needDec=()=>{if(!S.decOK)throw Error('Promotion and review decisions are not switched on yet: run setup_career_private.sql once in Supabase.')};
 // The MD's list on Follow-ups: promotions and quarterly reviews waiting for an MD decision.
 function mdInbox(){if(!isMD())return'';const L=[];
-  Object.entries(S.career).forEach(([id,c])=>{const n=S.staff[id]?.name||'',p=pendingPromo(c);
-    if(p)L.push(`<div class="row" data-cr="${id}"><div class="l"><b>${E(n)}</b><span>Promotion to ${LV[p.to]}</span></div><small>Recommended by ${E(p.by)} on ${fd(p.date)}: ${E(p.reason)}</small></div>`);
-    (c.reviews||[]).filter(r=>r.md==='pending').forEach(r=>L.push(`<div class="row" data-cr="${id}"><div class="l"><b>${E(n)}</b><span>${E(r.quarter)} review: ${E(REC[r.rec]||r.rec)}</span></div><small>Rated ${RD[r.rating]||''} on ${fd(r.date)}</small></div>`))});
+  Object.values(S.dec).forEach(d=>{const n=S.staff[d.staff]?.name||'';
+    if(d.kind==='promo'&&d.status==='pending')L.push(`<div class="row" data-cr="${d.staff}"><div class="l"><b>${E(n)}</b><span>Promotion to ${LV[d.to]}</span></div><small>Recommended by ${E(d.by)} on ${fd(d.date)}: ${E(d.reason)}</small></div>`);
+    if(d.kind==='review'&&d.md==='pending'){const r=(S.career[d.staff]?.reviews||[]).find(x=>x.id===d.id)||{};L.push(`<div class="row" data-cr="${d.staff}"><div class="l"><b>${E(n)}</b><span>${E(r.quarter||'')} review: ${E(REC[d.rec]||d.rec||'')}</span></div><small>Rated ${RD[r.rating]||''} on ${fd(r.date)}</small></div>`)}});
   return L.length?`<h2>Waiting for your MD decision<small>${L.length}</small></h2>${L.join('')}`:''}
 // Promotion record: a manager recommends, the MD's decision is recorded, and an approval moves the person up a level.
-// c.promos = [{id, from, to, fromStart, date, by, reason, status: pending|approved|declined, decBy, decDate, decReason, effective}]
-const pendingPromo=c=>(c.promos||[]).find(p=>p.status==='pending');
 function promoForm(id){const c=S.career[id],p=S.staff[id],lv=lvOf(c),st=cstat(id);
-  if(lv>=LV.length-1)return alert(p.name+' is already at the top level.');if(pendingPromo(c))return alert('A promotion recommendation is already waiting for the MD decision.');
+  if(lv>=LV.length-1)return alert(p.name+' is already at the top level.');if(pendingPromo(id))return alert('A promotion recommendation is already waiting for the MD decision.');
   modal('Recommend promotion: '+E(p.name),[{k:'to',l:'Promote to',t:'select',o:LV.map((l,i)=>[String(i),l]).slice(lv+1)},{k:'date',l:'Date recommended',t:'date'},{k:'reason',l:'Why: achievements and readiness'+(st==='ready'?'':' (not all readiness criteria are met yet)'),t:'area'}],{to:String(lv+1),date:ld(),reason:''},
-    async d=>{if(!d.reason.trim())throw Error('Write why this person is recommended.');
-      const x={id:cuid(),from:lv,to:Number(d.to),fromStart:c.start,date:d.date||ld(),by:my().ini,reason:d.reason.trim(),status:'pending'};
-      await cdoc(id).set({...S.career[id],promos:[x,...(S.career[id].promos||[])]})})}
-function decideForm(id,pid){const c=S.career[id],p=S.staff[id],r=(c.promos||[]).find(x=>x.id===pid);if(!r||r.status!=='pending')return;
+    async d=>{needDec();if(!d.reason.trim())throw Error('Write why this person is recommended.');
+      const x={id:cuid(),kind:'promo',staff:id,from:lv,to:Number(d.to),fromStart:c.start,date:d.date||ld(),by:my().ini,reason:d.reason.trim(),status:'pending'};
+      await ddoc(x.id).set(x)})}
+function decideForm(id,pid){const p=S.staff[id],r=S.dec[pid];if(!r||r.kind!=='promo'||r.status!=='pending')return;
   if(!canDecide())return alert('Only the MD can record this decision. It is waiting in the MD\'s list.');
   modal('MD decision: '+E(p.name)+' → '+LV[r.to],[{k:'status',l:'Decision',t:'select',o:[['approved','Approved'],['declined','Declined']]},...(isMD()?[]:[{k:'decBy',l:'Decided by (no MD is set in Team yet)'}]),{k:'decDate',l:'Decision date',t:'date'},{k:'effective',l:'Promotion takes effect on (if approved)',t:'date'},{k:'decReason',l:'Reason for the decision',t:'area'}],
     {status:'approved',decBy:isMD()?my().ini:'CM',decDate:ld(),effective:ld(),decReason:''},
     async d=>{if(isMD())d.decBy=my().ini;if(!d.decReason.trim())throw Error('Record the reason for the MD decision.');if(!(d.decBy||'').trim())throw Error('Write who made the decision.');
       const ok=d.status==='approved';if(ok&&!d.effective)throw Error('Pick the date the promotion takes effect.');
       const x={...r,status:d.status,decBy:d.decBy.trim(),decDate:d.decDate||ld(),decReason:d.decReason.trim(),effective:ok?d.effective:'',recBy:my().ini};
-      const cur=S.career[id],promos=(cur.promos||[]).map(o=>o.id===pid?x:o);
+      await ddoc(pid).set(x);
       // Approval moves them up: new level, start date and expected months; personal targets are cleared for the new level.
-      await cdoc(id).set(ok?{...cur,promos,level:x.to,start:x.effective,range:cs().range[x.to],targets:{}}:{...cur,promos})},
-    ()=>{const cur=S.career[id];return cdoc(id).set({...cur,promos:(cur.promos||[]).filter(o=>o.id!==pid)})})}
-// Career history: start at the first level, then each promotion. Staff see approved promotions only.
-function histPanel(c,mg){const ps=[...(c.promos||[])].sort((a,b)=>(a.effective||a.date)<(b.effective||b.date)?-1:1),ap=ps.filter(p=>p.status==='approved'),first=ap[0];
+      // The staff-readable career record only gets the level change itself (history), never the reasons.
+      const cur=S.career[id];if(ok)await cdoc(id).set({...cur,level:x.to,start:x.effective,range:cs().range[x.to],targets:{},history:[...(cur.history||[]),{from:x.from,to:x.to,fromStart:x.fromStart,effective:x.effective}]})},
+    ()=>ddoc(pid).delete())}
+// Career history: start at the first level, then each promotion. Staff see level changes only; managers also see recommendations and decisions.
+function histPanel(c,mg,id){const H=[...(c.history||[])].sort((a,b)=>a.effective<b.effective?-1:1),first=H[0],P=mg?decs(id,'promo'):[];
   const ev=[{d:first?first.fromStart:c.start,t:'Started as '+LV[first?first.from:lvOf(c)]}];
-  (mg?ps:ap).forEach(p=>ev.push(p.status==='approved'?{d:p.effective,t:'Promoted to '+LV[p.to],s:`recommended by ${p.by} on ${fd(p.date)}, approved by ${p.decBy}`+(mg&&p.decReason?`: ${p.decReason}`:''),c:'ok'}
-    :p.status==='pending'?{d:p.date,t:'Recommended for '+LV[p.to],s:`by ${p.by}: ${p.reason} · waiting for MD decision`,c:'pd',pid:p.id}
+  H.forEach(h=>{const p=P.find(x=>x.status==='approved'&&x.to===h.to&&x.effective===h.effective);ev.push({d:h.effective,t:'Promoted to '+LV[h.to],s:p?`recommended by ${p.by} on ${fd(p.date)}, approved by ${p.decBy}${p.decReason?': '+p.decReason:''}`:'',c:'ok'})});
+  P.filter(p=>p.status!=='approved').forEach(p=>ev.push(p.status==='pending'?{d:p.date,t:'Recommended for '+LV[p.to],s:`by ${p.by}: ${p.reason} · waiting for MD decision`,c:'pd',pid:p.id}
     :{d:p.decDate||p.date,t:'Not approved: '+LV[p.to],s:`declined by ${p.decBy}: ${p.decReason}`,c:'no'}));
   ev.sort((a,b)=>(a.d||'')<(b.d||'')?-1:1);
-  return `<div class="pn"><h2>Career history<small>${mg&&lvOf(c)<LV.length-1&&!pendingPromo(c)?'<button class="lnk" data-cpromo="1">+ Recommend promotion</button>':''}</small></h2><div class="tml">${ev.map(e=>`<div class="te ${e.c||''}"${e.pid&&mg&&canDecide()?` data-cdec="${e.pid}"`:''}><b>${E(e.t)}</b><small class="cnt">${fd(e.d)}${e.s?' · '+E(e.s):''}</small>${e.pid&&mg&&canDecide()?'<br><span class="lnk">Record MD decision</span>':''}</div>`).join('')}</div></div>`}
+  return `<div class="pn"><h2>Career history<small>${mg&&S.decOK&&lvOf(c)<LV.length-1&&!pendingPromo(id)?'<button class="lnk" data-cpromo="1">+ Recommend promotion</button>':''}</small></h2>${mg&&!S.decOK?'<p class="cnt">Promotion and review decisions need setup_career_private.sql to be run once in Supabase.</p>':''}<div class="tml">${ev.map(e=>`<div class="te ${e.c||''}"${e.pid&&mg&&canDecide()?` data-cdec="${e.pid}"`:''}><b>${E(e.t)}</b><small class="cnt">${fd(e.d)}${e.s?' · '+E(e.s):''}</small>${e.pid&&mg&&canDecide()?'<br><span class="lnk">Record MD decision</span>':''}</div>`).join('')}</div></div>`}
 function checkinForm(id){const c=S.career[id],p=S.staff[id],b=booked(c),ck=nextCk(c);
   const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:ck.d&&ck.d>ld()?ck.d:dplus(ld(),3),time:'10:00',remind:'1440',notes:CKAGENDA};
   modal((b?'Change check-in: ':'Book check-in: ')+E(p.name),[{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Agenda (optional)',t:'area'}],v,
@@ -556,7 +563,7 @@ const gz=r=>{const pct=r.t?Math.min(100,r.v/r.t*100):0,d=r.prev==null?null:r.v-r
   return `<button type="button" class="gz"${r.r?` data-ck="${r.k}"`:''}><div class="l"><span class="gl">${E(r.l)}<span class="tag">${r.mgr?'Manager':'CRM'}</span>${r.own?'<span class="tag">Personal target</span>':''}</span><b>${fmt(r.v)}${r.u} <small>/ ${fmt(r.t)}${r.u}</small>${d>0?` <span class="up">▲${fmt(d)}</span>`:d<0?` <span class="dn">▼${fmt(-d)}</span>`:''}</b></div><div class="bar"><i class="${r.v>=r.t?'ok':''}" style="width:${pct}%"></i></div></button>`};
 const nrow=(n,mg)=>{const late=n.action&&!n.done&&n.due&&dsince(n.due)>0;
   return `<div class="row"${mg?` data-cn="${n.id}"`:' style="cursor:default"'}><div class="l"><b>${E(n.type)}</b><span>${fd(n.date)}</span></div><span>${E(n.text)}</span>${n.action?`<div class="act ${n.done?'done':late?'late':''}">${n.done?'Done':late?'Overdue':'Open'} · ${E(n.action)}<small class="cnt"> · ${E(n.owner)}${n.due?' · due '+fd(n.due):''}</small></div>`:''}</div>`};
-const rrow=(r,mg,nr)=>`<div class="row ${r.rating==='ready'?'win':''}"${mg?` data-crv="${r.id}"`:' style="cursor:default"'}><div class="l"><b>${E(r.quarter)} · ${RD[r.rating]||''}${r.risk?' · at risk':''}</b><span>${fd(r.date)}</span></div>${mg?`<span>${r.rec==='promotion'&&nr?'Promotion to '+nr:REC[r.rec]||''} · ${MD[r.md]||''}</span>${r.reason?`<small>${E(r.reason)}</small>`:''}`:''}</div>`;
+const rrow=(r0,mg,nr)=>{const r=mg?{...r0,...(S.dec[r0.id]||{})}:r0;return `<div class="row ${r.rating==='ready'?'win':''}"${mg?` data-crv="${r.id}"`:' style="cursor:default"'}><div class="l"><b>${E(r.quarter)} · ${RD[r.rating]||''}${r.risk?' · at risk':''}</b><span>${fd(r.date)}</span></div>${mg?`<span>${r.rec==='promotion'&&nr?'Promotion to '+nr:REC[r.rec]||''} · ${MD[r.md]||''}</span>${r.reason?`<small>${E(r.reason)}</small>`:''}`:''}</div>`};
 const onb=(c,mg,dir)=>{const o=c.onb||{},n=ONB.filter(x=>o[x[0]]).length;
   return `<div class="pn"><h2>Onboarding<small>day ${Math.max(0,dir)} of 30 · ${n}/${ONB.length} done</small></h2>${ONB.map(([k,w,l])=>`<div class="tr"><small style="width:70px">${w}</small><span>${mg?`<label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--ink)"><input type="checkbox" data-cob="${k}"${o[k]?' checked':''} style="width:auto;margin:0">${l}</label>`:`${o[k]?'✓':'–'} ${l}`}</span></div>`).join('')}${dir>30&&n<ONB.length?'<small class="r-risk">Past day 30 with steps still open.</small>':''}</div>`};
 
@@ -572,26 +579,26 @@ function pv(id){
   <div class="hd"><div><h2>${E(p.name)}</h2><small class="cnt">${LV[lv]} · ${mir(c)} months in role (since ${fd(c.start)})${nr?' · working toward '+nr:''}</small></div><div class="acts"><span class="bdg r-${st}">${RD[st]}</span>${rk?'<span class="bdg r-risk">At risk</span>':''}<button class="sb" data-cprint>Print</button>${mg?`<button class="sb" data-cbook="${id}">${ck.bk?'Change check-in':'Book check-in'}</button><button class="sb" data-cset="${id}">Edit setup</button>`:''}</div></div>
   <div class="kpi"><div><b>${lr?fd(lr):'None'}</b><small>Last manager review</small></div><div class="${nxl?'late':''}"><b>${ck.d?fd(ck.d)+(ck.bk&&ck.t?' '+ck.t:''):'Not booked'}</b><small>${ck.bk?'Check-in booked'+(ck.by?' with '+E(ck.by):''):'Next monthly check-in'+(ck.d?(nxl?' (overdue, not booked)':' (not booked)'):'')}</small></div><div><b>${qof(ld())}</b><small>Quarterly review by ${fd(qend(ld()))}</small></div><div class="${late?'late':''}"><b>${acts.length}</b><small>Open actions${late?`, ${late} overdue`:''}</small></div></div>
   ${rk?`<div class="pn warn"><b class="r-risk">At risk:</b> ${mir(c)} months in role (expected ${rg[0]}–${rg[1]}) and no manager review in the last 92 days.<br><small class="cnt">The Sales Director holds a growth-path conversation before the next monthly check-in.</small></div>`:''}
-  ${mg&&pendingPromo(c)?(r=>`<div class="pn hi"><b>Promotion to ${LV[r.to]} recommended</b> by ${E(r.by)} on ${fd(r.date)}, waiting for the MD decision.${canDecide()?` <button class="lnk" data-cdec="${r.id}">Record MD decision</button>`:''}</div>`)(pendingPromo(c)):''}
+  ${mg&&pendingPromo(id)?(r=>`<div class="pn hi"><b>Promotion to ${LV[r.to]} recommended</b> by ${E(r.by)} on ${fd(r.date)}, waiting for the MD decision.${canDecide()?` <button class="lnk" data-cdec="${r.id}">Record MD decision</button>`:''}</div>`)(pendingPromo(id)):''}
   ${dir<=60?onb(c,mg,dir):''}
   <div class="g2"><div class="pn hi"><h2>Promotion readiness<small>${RD[st]}</small></h2>
     <div class="ck ${h>=.75?'ok':''}"><b>${h>=.75?'✓':'–'}</b>KPI targets met: ${Math.round(h*100)}% (needs 75%)</div>
     <div class="ck ${tn===1?'ok':''}"><b>${tn===1?'✓':'–'}</b>Training complete: ${Math.round(tn*100)}% (needs 100%)</div>
     <div class="ck ${rc?'ok':''}"><b>${rc?'✓':'–'}</b>Manager review in the last 92 days</div>
-    <div class="nx">${st==='ready'?`<b>All criteria met.</b> Ready to discuss ${nr?'promotion to '+nr:'expanded duties'} at the ${qof(ld())} review.${mg&&nr&&!pendingPromo(c)?' <button class="lnk" data-cpromo="1">Recommend promotion</button>':''}`:`<b>What is needed to reach Ready</b><ul>${steps(id).map(s=>`<li>${E(s)}</li>`).join('')}</ul>`}</div>
+    <div class="nx">${st==='ready'?`<b>All criteria met.</b> Ready to discuss ${nr?'promotion to '+nr:'expanded duties'} at the ${qof(ld())} review.${mg&&nr&&!pendingPromo(id)?' <button class="lnk" data-cpromo="1">Recommend promotion</button>':''}`:`<b>What is needed to reach Ready</b><ul>${steps(id).map(s=>`<li>${E(s)}</li>`).join('')}</ul>`}</div>
     <p class="cnt" style="margin:8px 0 0">At the quarterly review: ${RDN[st]}</p></div>
   <div class="pn"><h2>KPIs from the CRM<small>vs last month</small></h2>${rows.map(gz).join('')}<small class="cnt">Tap a KPI to see the quotes or activities behind it.</small></div></div>
   ${trendPanel(rows,p.ini)}
   <div class="g2"><div class="pn"><h2>Training<small>${tr.filter(t=>t.s==='done').length}/${tr.length}</small></h2>${tr.map(t=>`<div class="tr"><span>${E(t.n)}${t.s==='done'?`<br><small>${t.a?'Assessment passed '+fd(t.a):'Assessment date not recorded'}</small>`:''}</span>${mg?`<select data-ct="${E(t.n)}" aria-label="Status of ${E(t.n)}">${Object.entries(TS).map(([k,l])=>`<option value="${k}"${k===t.s?' selected':''}>${l}</option>`).join('')}</select>${t.s==='done'?`<input type="date" data-ca="${E(t.n)}" value="${t.a}" aria-label="Assessment passed on">`:''}`:`<small>${TS[t.s]}</small>`}</div>`).join('')}<small class="cnt">A module counts as complete only after its offline assessment is passed.</small></div>
   <div class="pn"><h2>Career ladder</h2><div class="rail">${LV.map((l,i)=>`<div class="${i===lv?'c':i<lv?'p':''}">${l}${i===lv?'<br><small>Current</small>':i===lv+1?'<br><small>Next</small>':''}</div>`).join('')}</div></div></div>
-  ${histPanel(c,mg)}
+  ${histPanel(c,mg,id)}
   ${lostPanel(S.quotes.filter(q=>q.sales===p.ini||q.ae===p.ini),'Why deals were lost')}
   <h2>Feedback and development actions<small>${mg?'<button class="lnk" data-cn="new">+ Add note</button>':notes.length}</small></h2>${notes.map(n=>nrow(n,mg)).join('')||'<p class="empty">No feedback logged yet.</p>'}
   <h2>Quarterly reviews<small>${mg?'<button class="lnk" data-crv="new">+ Record review</button>':revs.length}</small></h2>${revs.map(r=>rrow(r,mg,nr)).join('')||'<p class="empty">No quarterly review recorded yet.</p>'}`}
 function tv(){
   const R=Object.keys(S.career).filter(id=>S.staff[id]).map(id=>({id,c:S.career[id],p:S.staff[id],st:cstat(id),rk:crisk(id),h:hit(id),tn:trn(id),lr:lastRev(S.career[id])})).sort((a,b)=>a.p.name.localeCompare(b.p.name));
   const n=k=>R.filter(r=>r.st===k).length,due=r=>!booked(r.c)&&(!r.lr||dsince(r.lr)>30),K=(r,k)=>crmKpi(r.p.ini,k).v;
-  const att=[...R.filter(r=>r.rk).map(r=>[r,'late','r-risk','At risk',`${mir(r.c)} months in role, no manager review in 92 days${booked(r.c)?' · check-in booked '+ckTxt(nextCk(r.c)):''}`]),...R.filter(r=>pendingPromo(r.c)).map(r=>[r,'','r-developing','Promotion decision pending',`Recommended for ${LV[pendingPromo(r.c).to]} on ${fd(pendingPromo(r.c).date)}`]),...R.filter(r=>r.st==='ready'&&!pendingPromo(r.c)).map(r=>[r,'win','r-ready','Ready','Meets all criteria; discuss at the quarterly review']),...R.filter(r=>!r.rk&&due(r)).map(r=>[r,'','r-early','Check-in due',r.lr?'Last review '+fd(r.lr):'No review logged yet'])];
+  const att=[...R.filter(r=>r.rk).map(r=>[r,'late','r-risk','At risk',`${mir(r.c)} months in role, no manager review in 92 days${booked(r.c)?' · check-in booked '+ckTxt(nextCk(r.c)):''}`]),...R.filter(r=>pendingPromo(r.id)).map(r=>[r,'','r-developing','Promotion decision pending',`Recommended for ${LV[pendingPromo(r.id).to]} on ${fd(pendingPromo(r.id).date)}`]),...R.filter(r=>r.st==='ready'&&!pendingPromo(r.id)).map(r=>[r,'win','r-ready','Ready','Meets all criteria; discuss at the quarterly review']),...R.filter(r=>!r.rk&&due(r)).map(r=>[r,'','r-early','Check-in due',r.lr?'Last review '+fd(r.lr):'No review logged yet'])];
   const out=Object.entries(S.staff).filter(([id,s])=>s.active!==false&&['sales','support'].includes(s.role)&&!S.career[id]);
   return `<div class="kpi"><div><b class="r-ready">${n('ready')}</b><small>Ready</small></div><div><b class="r-developing">${n('developing')}</b><small>Developing</small></div><div><b>${n('early')}</b><small>Early stage</small></div><div class="${R.some(r=>r.rk)?'late':''}"><b>${R.filter(r=>r.rk).length}</b><small>At risk</small></div></div>
   <h2>Needs your attention<small>${att.length}</small></h2>${att.map(([r,rc,c,t,w])=>`<div class="row ${rc}" data-cr="${r.id}"><div class="l"><b>${E(r.p.name)}</b><span class="${c}">${t}</span></div><small>${E(w)}</small></div>`).join('')||'<p class="empty">Nobody is at risk, ready, or due a check-in.</p>'}
@@ -620,12 +627,14 @@ function noteForm(id,n){const v=n?{...n,done:n.done?'Done':'Open'}:{date:ld(),ty
       await cdoc(id).set({...c,...(ci?{checkin:null}:{}),notes:n?(c.notes||[]).map(o=>o.id===n.id?x:o):[x,...(c.notes||[])]});
       if(ci?.vid&&S.visits.some(v=>v.id===ci.vid))await DB.collection('visits').doc(ci.vid).update({status:'Done',outcome:'Check-in held; see the career notes.'})},
     n?()=>{const c=S.career[id];return cdoc(id).set({...c,notes:(c.notes||[]).filter(o=>o.id!==n.id)})}:null)}
-function reviewForm(id,r){const st=cstat(id),nr=LV[lvOf(S.career[id])+1],v=r||{quarter:qof(ld()),date:ld(),rating:st,rec:st==='ready'?'promotion':'none',md:st==='ready'?'pending':'na',reason:''};
+function reviewForm(id,r){const st=cstat(id),nr=LV[lvOf(S.career[id])+1],v=r?{rec:'none',md:'na',reason:'',...r,...(S.dec[r.id]||{})}:{quarter:qof(ld()),date:ld(),rating:st,rec:st==='ready'?'promotion':'none',md:st==='ready'?'pending':'na',reason:''};
   modal(r?'Edit quarterly review':'Record quarterly review',[{k:'quarter',l:'Quarter'},{k:'date',l:'Review date',t:'date'},{k:'rating',l:'Rating',t:'select',o:Object.entries(RD)},{k:'rec',l:'Recommendation',t:'select',o:Object.entries({...REC,promotion:nr?'Promotion to '+nr:'Promotion'})},{k:'md',l:canDecide()?'MD decision':'MD decision (only the MD can approve or decline)',t:'select',o:Object.entries(MD).filter(([k])=>canDecide()||['na','pending',v.md].includes(k))},{k:'reason',l:'Reason for the rating and decision',t:'area'}],v,
-    async d=>{if(!d.quarter.trim()||!d.date)throw Error('Fill in the quarter and date.');if(['approved','declined'].includes(d.md)&&d.md!==r?.md&&!canDecide())throw Error('Only the MD can approve or decline.');if(['approved','declined'].includes(d.md)&&!d.reason.trim())throw Error('Record the reason for the MD decision.');
-      const c=S.career[id],x={id:r?.id||cuid(),quarter:d.quarter.trim(),date:d.date,rating:d.rating,rec:d.rec,md:d.md,reason:d.reason.trim(),risk:r?!!r.risk:crisk(id)};
-      await cdoc(id).set({...c,reviews:r?(c.reviews||[]).map(o=>o.id===r.id?x:o):[x,...(c.reviews||[])]})},
-    r?()=>{const c=S.career[id];return cdoc(id).set({...c,reviews:(c.reviews||[]).filter(o=>o.id!==r.id)})}:null)}
+    async d=>{needDec();if(!d.quarter.trim()||!d.date)throw Error('Fill in the quarter and date.');if(['approved','declined'].includes(d.md)&&d.md!==v.md&&!canDecide())throw Error('Only the MD can approve or decline.');if(['approved','declined'].includes(d.md)&&!d.reason.trim())throw Error('Record the reason for the MD decision.');
+      // The rating is shared with the salesperson; the recommendation, MD decision and reason stay in the private table.
+      const rid=r?.id||cuid(),c=S.career[id],x={id:rid,quarter:d.quarter.trim(),date:d.date,rating:d.rating,risk:r?!!r.risk:crisk(id)};
+      await ddoc(rid).set({kind:'review',staff:id,rec:d.rec,md:d.md,reason:d.reason.trim()});
+      await cdoc(id).set({...c,reviews:r?(c.reviews||[]).map(o=>o.id===rid?x:o):[x,...(c.reviews||[])]})},
+    r?async()=>{const c=S.career[id];if(S.dec[r.id])await ddoc(r.id).delete();return cdoc(id).set({...c,reviews:(c.reviews||[]).filter(o=>o.id!==r.id)})}:null)}
 function levelForm(i){const C=cs(),T=C.kpi[i],v={training:C.training[i].join('\n'),rmin:C.range[i][0],rmax:C.range[i][1]};Object.entries(T).forEach(([k,t])=>v['t_'+k]=t);
   modal('Settings: '+LV[i],[...Object.keys(T).map(k=>({k:'t_'+k,l:'Target: '+(MET[k]?.l||k),t:'number'})),{k:'rmin',l:'Expected months at this level: from',t:'number'},{k:'rmax',l:'to',t:'number'},{k:'training',l:'Training modules, one per line (renaming a module resets its status for everyone)',t:'area'}],v,
     async d=>{const x=JSON.parse(JSON.stringify(S.cset||{}));x.kpi={...(x.kpi||{})};x.training={...(x.training||{})};x.range={...(x.range||{})};

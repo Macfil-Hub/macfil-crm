@@ -35,7 +35,7 @@ A CRM modelled on Translead CRM (Japanese CRM/SFA):
 Additional rules:
 - New sign-ups start inactive. The first sign-up becomes the admin manager.
 - Admins set initials, role, admin and active status in the Team screen.
-- MD: a manager with `md: true` on their staff record (Team screen). `canDecide()` = the MD, or any manager while no MD is set. MD decisions (promotions, review MD decision) are limited in the app only; the database still lets any manager write career records.
+- MD: a manager with `md: true` on their staff record (Team screen). `canDecide()` = the MD, or any manager while no MD is set. The database enforces this on `career_decisions` (see Sales career development).
 
 ## Team
 | Initials | Name | Title |
@@ -109,7 +109,8 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 - Readiness: Ready = at least 75% of KPI targets met, all training passed, and a manager note or review in the last 92 days. Developing = at least 50% of each. At risk = longer than expected at the level with no review in 92 days.
 - Default targets and training modules are drafts; Wong confirms them under Programme settings.
 - Lost reasons: quotes carry `why` (one of LOSTR in index.html) when Closed, Lost or Declined; `lostPanel()` groups the last 90 days by reason.
-- Promotions: `career.promos` = [{id, from, to, fromStart, date, by, reason, status pending|approved|declined, decBy, decDate, decReason, effective}]; approval sets level, start = effective, range and clears targets. Staff see approved entries only (UI-level; the row itself is readable by its owner).
+- Private decisions (`setup_career_private.sql`): table `career_decisions`, managers only (RLS). Row kind `promo` = {staff, from, to, fromStart, date, by, reason, status pending|approved|declined, decBy, decDate, decReason, effective}; kind `review` = {staff, rec, md, reason} with the same id as its `career.reviews` entry (which keeps only quarter, date, rating, risk). A trigger lets only the MD approve, decline, change or delete a decided row once an MD is set (`is_md()`, `md_set()`).
+- Promotions: approval sets level, start = effective, range, clears targets, and appends {from, to, fromStart, effective} to `career.history`, the only part staff can read.
 - Check-ins: `career.checkin` = {date, time, remind, notes, by, vid}; `vid` is a visits record of type `Check-in` with `careerOf` = staff id, owned by the manager. A Monthly check-in note dated on or after the booking clears it and marks the visit Done.
 
 ## Backlog (in this order)
