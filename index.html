@@ -80,6 +80,10 @@ aside button.on{border-top-color:#ff7a59}.top input{display:none}.top .cta{margi
 .cd b{font-size:13px;align-self:flex-start;padding:0 6px;border-radius:10px}.cd.ot{opacity:.45}.cd.td b{background:var(--acc);color:#fff}.cd.on{outline:2px solid var(--acc);outline-offset:-2px}
 .ev{display:block;font-style:normal;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:3px;padding:1px 4px;background:rgba(31,95,139,.13)}
 .ev.rm{background:rgba(196,87,26,.16)}.ev.ci{background:rgba(120,80,170,.16)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px 18px;margin-bottom:8px}
+.tc .l{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--mut);margin-bottom:2px}.tc .l span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tc .l small{white-space:nowrap}.tc svg{display:block;width:100%;height:auto;overflow:visible}
+.tc .tok{fill:var(--ok)}.tc .tlo{fill:#ff7a59}.tc .tl{stroke:var(--mut);stroke-width:1;stroke-dasharray:4 3}
+.tc .tx{font-size:10px;fill:var(--mut);text-anchor:middle}.tc .tv{font-size:11px;font-weight:700;fill:var(--ink);text-anchor:middle}
 .lr{margin-bottom:12px}.lr .l{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:4px}.lr b{white-space:nowrap}.ev.fq{background:rgba(47,125,79,.15)}.ev.dn{opacity:.6;text-decoration:line-through}
 .cd small{font-size:10px;color:var(--mut)}.dots{display:none;font-style:normal;color:var(--acc);font-size:15px;line-height:1;letter-spacing:1px}
 #toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:8;width:max-content;max-width:calc(100% - 24px);background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -475,8 +479,20 @@ const ckTxt=ck=>ck.bk?fd(ck.d)+(ck.t?' '+ck.t:''):ck.d?fd(ck.d)+' (not booked)':
 function lostPanel(l,title){const fr=dplus(ld(),-90),x=l.filter(q=>LOSTST.includes(st(q))&&(q.date||'')>=fr),g={};
   x.forEach(q=>{const k=q.why||'Not recorded';(g[k]=g[k]||[]).push(q)});const rows=Object.entries(g).sort((a,b)=>b[1].length-a[1].length),mx=rows[0]?.[1].length||1;
   return `<div class="pn"><h2>${title}<small>${x.length} in the last 90 days</small></h2>${rows.map(([k,qs])=>`<div class="lr"><div class="l"><span>${E(k)}</span><b>${qs.length} · ${money(qs)}</b></div><div class="bar"><i style="width:${qs.length/mx*100}%"></i></div><small class="cnt">→ ${E(LOSTHINT[k]||'')}</small></div>`).join('')||'<p class="empty">No closed, lost or declined quotes in the last 90 days.</p>'}</div>`}
+// KPI trend: the last 6 months (4 quarters for new customers), using crmKpi's period offset.
+function trendData(ini,k){const t=new Date(),qt=k==='accounts',n=qt?4:6;
+  return [...Array(n)].map((_,i)=>{const off=n-1-i,d=qt?new Date(t.getFullYear(),Math.floor(t.getMonth()/3)*3-3*off,1):new Date(t.getFullYear(),t.getMonth()-off,1);
+    return{l:qt?'Q'+(Math.floor(d.getMonth()/3)+1)+" '"+String(d.getFullYear()).slice(2):d.toLocaleDateString('en-GB',{month:'short'}),v:crmKpi(ini,k,off).v}})}
+function spark(r,ini){const D=trendData(ini,r.k),W=260,H=100,pt=18,pb=18,mx=Math.max(r.t,...D.map(d=>d.v),1)*1.12,bw=W/D.length,y=v=>H-pb-v/mx*(H-pb-pt),ty=y(r.t);
+  const bars=D.map((d,i)=>{const w=bw*.56,x=i*bw+(bw-w)/2,top=y(d.v),h=H-pb-top,cl=d.v>=r.t?'tok':'tlo',last=i===D.length-1;
+    const bar=h<=0?'':h<4?`<rect x="${x}" y="${top}" width="${w}" height="${h}" class="${cl}"/>`:`<path d="M${x},${H-pb}V${top+3}q0,-3 3,-3h${w-6}q3,0 3,3V${H-pb}Z" class="${cl}"/>`;
+    return `<g><title>${d.l}${last?' (so far)':''}: ${fmt(d.v)}${r.u} · target ${fmt(r.t)}${r.u}</title><rect x="${i*bw}" y="0" width="${bw}" height="${H}" fill="transparent"/>${bar}<text x="${x+w/2}" y="${H-4}" class="tx">${d.l}</text>${last?`<text x="${x+w/2}" y="${top-5}" class="tv">${fmt(d.v)}${r.u}</text>`:''}</g>`}).join('');
+  return `<div class="tc"><div class="l"><span title="${E(r.l)}">${E(r.l)}</span><small>target ${fmt(r.t)}${r.u}</small></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${E(r.l)}: ${D.map(d=>d.l+' '+fmt(d.v)+r.u).join(', ')}; target ${fmt(r.t)}${r.u}"><line x1="0" x2="${W}" y1="${ty}" y2="${ty}" class="tl"/>${bars}</svg></div>`}
+const trendPanel=(rows,ini)=>{const R=rows.filter(r=>!r.mgr);return R.length?`<div class="pn"><h2>KPI trend<small>last 6 months · this month so far</small></h2><div class="tgrid">${R.map(r=>spark(r,ini)).join('')}</div><small class="cnt">Green bars met the target, orange bars are below it, and the dashed line is the target. Rates cover the 90 days (or 12 months) up to each month. Hover or tap a bar for its value.</small></div>`:''};
+// Default agenda for a new check-in booking; the manager can edit it.
+const CKAGENDA='1. KPIs this month\n2. Open quotes and overdue follow-ups\n3. Why deals were lost\n4. Next training module and assessment date\n5. Last actions: done?\n6. Agree 1–2 new actions';
 function checkinForm(id){const c=S.career[id],p=S.staff[id],b=booked(c),ck=nextCk(c);
-  const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:ck.d&&ck.d>ld()?ck.d:dplus(ld(),3),time:'10:00',remind:'1440',notes:''};
+  const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:ck.d&&ck.d>ld()?ck.d:dplus(ld(),3),time:'10:00',remind:'1440',notes:CKAGENDA};
   modal((b?'Change check-in: ':'Book check-in: ')+E(p.name),[{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Agenda (optional)',t:'area'}],v,
     async d=>{if(!d.date||!d.time)throw Error('Set a date and a time.');if(d.date<ld())throw Error('Pick today or a later date.');
       const V=DB.collection('visits'),old=b?.vid&&S.visits.some(x=>x.id===b.vid),vid=old?b.vid:'v'+Date.now().toString(36);
@@ -521,6 +537,7 @@ function pv(id){
     <div class="nx">${st==='ready'?`<b>All criteria met.</b> Ready to discuss ${nr?'promotion to '+nr:'expanded duties'} at the ${qof(ld())} review.`:`<b>What is needed to reach Ready</b><ul>${steps(id).map(s=>`<li>${E(s)}</li>`).join('')}</ul>`}</div>
     <p class="cnt" style="margin:8px 0 0">At the quarterly review: ${RDN[st]}</p></div>
   <div class="pn"><h2>KPIs from the CRM<small>vs last month</small></h2>${rows.map(gz).join('')}<small class="cnt">Tap a KPI to see the quotes or activities behind it.</small></div></div>
+  ${trendPanel(rows,p.ini)}
   <div class="g2"><div class="pn"><h2>Training<small>${tr.filter(t=>t.s==='done').length}/${tr.length}</small></h2>${tr.map(t=>`<div class="tr"><span>${E(t.n)}${t.s==='done'?`<br><small>${t.a?'Assessment passed '+fd(t.a):'Assessment date not recorded'}</small>`:''}</span>${mg?`<select data-ct="${E(t.n)}" aria-label="Status of ${E(t.n)}">${Object.entries(TS).map(([k,l])=>`<option value="${k}"${k===t.s?' selected':''}>${l}</option>`).join('')}</select>${t.s==='done'?`<input type="date" data-ca="${E(t.n)}" value="${t.a}" aria-label="Assessment passed on">`:''}`:`<small>${TS[t.s]}</small>`}</div>`).join('')}<small class="cnt">A module counts as complete only after its offline assessment is passed.</small></div>
   <div class="pn"><h2>Career ladder</h2><div class="rail">${LV.map((l,i)=>`<div class="${i===lv?'c':i<lv?'p':''}">${l}${i===lv?'<br><small>Current</small>':i===lv+1?'<br><small>Next</small>':''}</div>`).join('')}</div></div></div>
   ${lostPanel(S.quotes.filter(q=>q.sales===p.ini||q.ae===p.ini),'Why deals were lost')}

@@ -1,6 +1,8 @@
 # Macfil CRM: change log
 
 ## 2026-10-30
+- Career: new **KPI trend** panel on each person's page and on My progress: a small bar chart per KPI for the last 6 months (4 quarters for new customers), green when the target was met, with the target as a dashed line. Hover or tap a bar for its value.
+- Career: **Book check-in** now starts with a ready-made agenda (KPIs, open quotes, lost reasons, training, last actions, new actions), which the manager can edit.
 - Quotes: setting a quote to **Closed, Lost or Declined** now needs a reason from a list (Price, Technical scope, Slow response, Delivery time, Competitor brand, Customer cancelled, Other). The old text box is kept for details. Choosing one of these statuses on the board or in the table opens the quote so the reason can be picked.
 - Career: new **Why deals were lost** panel on each person's page and on the team page (last 90 days), with the training or action that would help most.
 - Career: managers can **Book check-in** on a person's page. It goes into the manager's Calendar with a reminder, the salesperson sees the booked date on My progress, and the roster shows it. Saving a "Monthly check-in" note on or after that date closes the booking and marks the calendar entry Done.
