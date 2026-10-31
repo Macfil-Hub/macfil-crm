@@ -1,5 +1,9 @@
 # Macfil CRM: change log
 
+## 2026-10-31
+- The role "Sales / AE" is now called **Sales** on every screen. (The AE field on quotes is unchanged.)
+- Clarified: sales support sees all quotes and all activities (this was already how the CRM worked).
+
 ## 2026-10-30
 - **Private decisions:** promotion recommendations, quarterly-review recommendations and MD decisions now live in a separate table that only managers can read. Salespeople keep seeing their review rating and approved promotions, but the reasons and decisions are no longer in their record. The database itself now allows only the MD to approve, decline or change a decision (any manager while no MD is set). Needs `setup_career_private.sql` run once in Supabase; existing decisions are moved automatically.
 - New **MD** setting in Team (for a Manager). The MD has a **Waiting for your MD decision** list at the top of Follow-ups. Only the MD can approve or decline promotions and quarterly-review recommendations; other managers can recommend and set "Pending MD". Until an MD is set, any manager can record the decision, as before.

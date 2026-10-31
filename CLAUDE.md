@@ -29,8 +29,8 @@ A CRM modelled on Translead CRM (Japanese CRM/SFA):
 | --- | --- | --- | --- |
 | Manager | CM, WL, CS, AY, PC | Everything | Everything; WL is also user admin |
 | Finance | AT | Everything | Read only; also user admin |
-| Sales support | SH | All deals | Creates quotes for anyone |
-| Sales / AE | KC, DH, AZ, FF | Only quotes where they are Sales or AE, and their own activities | Create and edit their own |
+| Sales support | SH | All quotes and all activities | Creates quotes and activities for anyone |
+| Sales | KC, DH, AZ, FF | Only quotes where they are Sales or AE, and their own activities | Create and edit their own |
 
 Additional rules:
 - New sign-ups start inactive. The first sign-up becomes the admin manager.

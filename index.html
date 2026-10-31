@@ -151,7 +151,7 @@ const LOSTHINT={'Price':'Negotiation and pricing coaching; check margin before q
 // Totals keep RM and USD apart instead of adding them together.
 const money=l=>{const t=c=>l.filter(q=>(q.curr||'RM').trim()===c).reduce((a,q)=>a+(q.price||0),0),u=t('USD');return 'RM '+fmt(t('RM'))+(u?' + USD '+fmt(u):'')};
 const ORD=['','Order placed','Delivered','Invoiced','Paid'];
-const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales / AE'};
+const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales'};
 const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{status:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null,dec:{},decOK:false};
 let DB,U,UID;
 const today=()=>ld();
