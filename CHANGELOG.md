@@ -1,5 +1,10 @@
 # Macfil CRM: change log
 
+## 2026-11-01
+- Career: quarters now follow the **April financial year** (Apr–Jun = Q1 … Jan–Mar = Q4), shown like "FY26/27 Q3", including the KPI trend and new quarterly reviews.
+- Career: managers **set the quarterly review date** themselves (Set quarterly review on the person's page). It goes into the manager's Calendar with a reminder; recording the review closes it. The tile shows "Not set" until a date is chosen.
+- Career: the "Open actions" tile is now called **Open development actions** (actions from feedback notes not yet marked Done).
+
 ## 2026-10-31
 - The role "Sales / AE" is now called **Sales** on every screen. (The AE field on quotes is unchanged.)
 - Clarified: sales support sees all quotes and all activities (this was already how the CRM worked).

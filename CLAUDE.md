@@ -111,6 +111,7 @@ JW and AJ are former staff who appear in historical data only. MF and JO are off
 - Lost reasons: quotes carry `why` (one of LOSTR in index.html) when Closed, Lost or Declined; `lostPanel()` groups the last 90 days by reason.
 - Private decisions (`setup_career_private.sql`): table `career_decisions`, managers only (RLS). Row kind `promo` = {staff, from, to, fromStart, date, by, reason, status pending|approved|declined, decBy, decDate, decReason, effective}; kind `review` = {staff, rec, md, reason} with the same id as its `career.reviews` entry (which keeps only quarter, date, rating, risk). A trigger lets only the MD approve, decline, change or delete a decided row once an MD is set (`is_md()`, `md_set()`).
 - Promotions: approval sets level, start = effective, range, clears targets, and appends {from, to, fromStart, effective} to `career.history`, the only part staff can read.
+- Financial year starts in April: `qof()` gives "FY26/27 Q3"; quarter blocks are the same three-month periods as calendar quarters, only the labels differ. `career.qrev` = the manager-set quarterly review date (same shape as `checkin`, calendar entry type Check-in); a new quarterly review on or after that date clears it.
 - Check-ins: `career.checkin` = {date, time, remind, notes, by, vid}; `vid` is a visits record of type `Check-in` with `careerOf` = staff id, owned by the manager. A Monthly check-in note dated on or after the booking clears it and marks the visit Done.
 
 ## Backlog (in this order)

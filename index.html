@@ -444,7 +444,9 @@ const pd=s=>{if(!s)return null;const[y,m,d]=String(s).split('-').map(Number);ret
 const dsince=s=>{const d=pd(s);return d?Math.round((pd(ld())-d)/864e5):Infinity};
 const dplus=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ld(d)};
 const fd=s=>{const d=pd(s);return d?d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):''};
-const qof=s=>{const d=pd(s);return d.getFullYear()+' Q'+(Math.floor(d.getMonth()/3)+1)};
+// Financial year starts in April: Apr–Jun is Q1, Jan–Mar is Q4. Labels look like "FY26/27 Q3".
+const fyq=d=>{const y=d.getMonth()>=3?d.getFullYear():d.getFullYear()-1;return{y,q:Math.floor(((d.getMonth()+9)%12)/3)+1}};
+const qof=s=>{const{y,q}=fyq(pd(s));return `FY${String(y).slice(2)}/${String(y+1).slice(2)} Q${q}`};
 const qend=s=>{const d=pd(s);return ld(new Date(d.getFullYear(),Math.floor(d.getMonth()/3)*3+3,0))};
 const cuid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function cs(){const x=S.cset||{},o={kpi:{},training:{},range:{}};LV.forEach((_,i)=>{o.kpi[i]=x.kpi?.[i]||CDEF.kpi[i];o.training[i]=x.training?.[i]||CDEF.training[i];o.range[i]=x.range?.[i]||CDEF.range[i]});return o}
@@ -492,7 +494,7 @@ function lostPanel(l,title){const fr=dplus(ld(),-90),x=l.filter(q=>LOSTST.includ
 // KPI trend: the last 6 months (4 quarters for new customers), using crmKpi's period offset.
 function trendData(ini,k){const t=new Date(),qt=k==='accounts',n=qt?4:6;
   return [...Array(n)].map((_,i)=>{const off=n-1-i,d=qt?new Date(t.getFullYear(),Math.floor(t.getMonth()/3)*3-3*off,1):new Date(t.getFullYear(),t.getMonth()-off,1);
-    return{l:qt?'Q'+(Math.floor(d.getMonth()/3)+1)+" '"+String(d.getFullYear()).slice(2):d.toLocaleDateString('en-GB',{month:'short'}),v:crmKpi(ini,k,off).v}})}
+    return{l:qt?(f=>`Q${f.q} ${String(f.y).slice(2)}/${String(f.y+1).slice(2)}`)(fyq(d)):d.toLocaleDateString('en-GB',{month:'short'}),v:crmKpi(ini,k,off).v}})}
 function spark(r,ini){const D=trendData(ini,r.k),W=260,H=100,pt=18,pb=18,mx=Math.max(r.t,...D.map(d=>d.v),1)*1.12,bw=W/D.length,y=v=>H-pb-v/mx*(H-pb-pt),ty=y(r.t);
   const bars=D.map((d,i)=>{const w=bw*.56,x=i*bw+(bw-w)/2,top=y(d.v),h=H-pb-top,cl=d.v>=r.t?'tok':'tlo',last=i===D.length-1;
     const bar=h<=0?'':h<4?`<rect x="${x}" y="${top}" width="${w}" height="${h}" class="${cl}"/>`:`<path d="M${x},${H-pb}V${top+3}q0,-3 3,-3h${w-6}q3,0 3,3V${H-pb}Z" class="${cl}"/>`;
@@ -541,6 +543,16 @@ function histPanel(c,mg,id){const H=[...(c.history||[])].sort((a,b)=>a.effective
     :{d:p.decDate||p.date,t:'Not approved: '+LV[p.to],s:`declined by ${p.decBy}: ${p.decReason}`,c:'no'}));
   ev.sort((a,b)=>(a.d||'')<(b.d||'')?-1:1);
   return `<div class="pn"><h2>Career history<small>${mg&&S.decOK&&lvOf(c)<LV.length-1&&!pendingPromo(id)?'<button class="lnk" data-cpromo="1">+ Recommend promotion</button>':''}</small></h2>${mg&&!S.decOK?'<p class="cnt">Promotion and review decisions need setup_career_private.sql to be run once in Supabase.</p>':''}<div class="tml">${ev.map(e=>`<div class="te ${e.c||''}"${e.pid&&mg&&canDecide()?` data-cdec="${e.pid}"`:''}><b>${E(e.t)}</b><small class="cnt">${fd(e.d)}${e.s?' · '+E(e.s):''}</small>${e.pid&&mg&&canDecide()?'<br><span class="lnk">Record MD decision</span>':''}</div>`).join('')}</div></div>`}
+// Quarterly review date, set by the manager; stored on the career record and put in the manager's Calendar.
+function qrevForm(id){const c=S.career[id],p=S.staff[id],b=c.qrev&&c.qrev.date>=ld()?c.qrev:null;
+  const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:qend(ld()),time:'10:00',remind:'1440',notes:''};
+  modal((b?'Change quarterly review: ':'Set quarterly review: ')+E(p.name),[{k:'date',l:'Review date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Notes (optional)',t:'area'}],v,
+    async d=>{if(!d.date||!d.time)throw Error('Set a date and a time.');if(d.date<ld())throw Error('Pick today or a later date.');
+      const V=DB.collection('visits'),old=b?.vid&&S.visits.some(x=>x.id===b.vid),vid=old?b.vid:'v'+Date.now().toString(36);
+      const a={type:'Check-in',purpose:`Quarterly review (${qof(d.date)}): ${p.name}`,customer:'',date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),status:'Planned',owner:my().ini,careerOf:id};
+      if(old)await V.doc(vid).update(a);else await V.doc(vid).set({...a,by:UID});
+      if(d.remind!=='')askNotify();
+      await cdoc(id).set({...S.career[id],qrev:{date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),by:my().ini,vid}})})}
 function checkinForm(id){const c=S.career[id],p=S.staff[id],b=booked(c),ck=nextCk(c);
   const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:ck.d&&ck.d>ld()?ck.d:dplus(ld(),3),time:'10:00',remind:'1440',notes:CKAGENDA};
   modal((b?'Change check-in: ':'Book check-in: ')+E(p.name),[{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Agenda (optional)',t:'area'}],v,
@@ -573,11 +585,11 @@ function cr(){
   if(S.cp&&S.career[S.cp])return pv(S.cp);
   S.cp=null;return tv()}
 function pv(id){
-  const c=S.career[id],p=S.staff[id]||{},mg=isMgr(),lv=lvOf(c),st=cstat(id),rk=crisk(id),rows=kRows(id),tr=tRows(id),h=hit(id),tn=trn(id),rc=recent(c),lr=lastRev(c),ck=nextCk(c),nxl=!ck.bk&&(!ck.d||dsince(ck.d)>0),nr=LV[lv+1],dir=dsince(c.start);
+  const c=S.career[id],p=S.staff[id]||{},mg=isMgr(),lv=lvOf(c),st=cstat(id),rk=crisk(id),rows=kRows(id),tr=tRows(id),h=hit(id),tn=trn(id),rc=recent(c),lr=lastRev(c),ck=nextCk(c),qr=c.qrev&&c.qrev.date>=ld()?c.qrev:null,nxl=!ck.bk&&(!ck.d||dsince(ck.d)>0),nr=LV[lv+1],dir=dsince(c.start);
   const acts=(c.notes||[]).filter(n=>n.action&&!n.done),late=acts.filter(n=>n.due&&dsince(n.due)>0).length,notes=[...(c.notes||[])].sort((a,b)=>a.date<b.date?1:-1),revs=[...(c.reviews||[])].sort((a,b)=>a.date<b.date?1:-1),rg=rangeOf(c);
   return `${mg?'<p style="margin:0 0 8px"><button class="lnk" data-cr="">← All staff</button></p>':''}
-  <div class="hd"><div><h2>${E(p.name)}</h2><small class="cnt">${LV[lv]} · ${mir(c)} months in role (since ${fd(c.start)})${nr?' · working toward '+nr:''}</small></div><div class="acts"><span class="bdg r-${st}">${RD[st]}</span>${rk?'<span class="bdg r-risk">At risk</span>':''}<button class="sb" data-cprint>Print</button>${mg?`<button class="sb" data-cbook="${id}">${ck.bk?'Change check-in':'Book check-in'}</button><button class="sb" data-cset="${id}">Edit setup</button>`:''}</div></div>
-  <div class="kpi"><div><b>${lr?fd(lr):'None'}</b><small>Last manager review</small></div><div class="${nxl?'late':''}"><b>${ck.d?fd(ck.d)+(ck.bk&&ck.t?' '+ck.t:''):'Not booked'}</b><small>${ck.bk?'Check-in booked'+(ck.by?' with '+E(ck.by):''):'Next monthly check-in'+(ck.d?(nxl?' (overdue, not booked)':' (not booked)'):'')}</small></div><div><b>${qof(ld())}</b><small>Quarterly review by ${fd(qend(ld()))}</small></div><div class="${late?'late':''}"><b>${acts.length}</b><small>Open actions${late?`, ${late} overdue`:''}</small></div></div>
+  <div class="hd"><div><h2>${E(p.name)}</h2><small class="cnt">${LV[lv]} · ${mir(c)} months in role (since ${fd(c.start)})${nr?' · working toward '+nr:''}</small></div><div class="acts"><span class="bdg r-${st}">${RD[st]}</span>${rk?'<span class="bdg r-risk">At risk</span>':''}<button class="sb" data-cprint>Print</button>${mg?`<button class="sb" data-cbook="${id}">${ck.bk?'Change check-in':'Book check-in'}</button><button class="sb" data-cqrev="${id}">${qr?'Change quarterly review':'Set quarterly review'}</button><button class="sb" data-cset="${id}">Edit setup</button>`:''}</div></div>
+  <div class="kpi"><div><b>${lr?fd(lr):'None'}</b><small>Last manager review</small></div><div class="${nxl?'late':''}"><b>${ck.d?fd(ck.d)+(ck.bk&&ck.t?' '+ck.t:''):'Not booked'}</b><small>${ck.bk?'Check-in booked'+(ck.by?' with '+E(ck.by):''):'Next monthly check-in'+(ck.d?(nxl?' (overdue, not booked)':' (not booked)'):'')}</small></div><div class="${qr?'':'late'}"><b>${qr?fd(qr.date)+(qr.time?' '+qr.time:''):'Not set'}</b><small>${qr?qof(qr.date)+' quarterly review'+(qr.by?' with '+E(qr.by):''):qof(ld())+' quarterly review: date not set'}</small></div><div class="${late?'late':''}"><b>${acts.length}</b><small>Open development actions${late?`, ${late} overdue`:''}</small></div></div>
   ${rk?`<div class="pn warn"><b class="r-risk">At risk:</b> ${mir(c)} months in role (expected ${rg[0]}–${rg[1]}) and no manager review in the last 92 days.<br><small class="cnt">The Sales Director holds a growth-path conversation before the next monthly check-in.</small></div>`:''}
   ${mg&&pendingPromo(id)?(r=>`<div class="pn hi"><b>Promotion to ${LV[r.to]} recommended</b> by ${E(r.by)} on ${fd(r.date)}, waiting for the MD decision.${canDecide()?` <button class="lnk" data-cdec="${r.id}">Record MD decision</button>`:''}</div>`)(pendingPromo(id)):''}
   ${dir<=60?onb(c,mg,dir):''}
@@ -633,7 +645,9 @@ function reviewForm(id,r){const st=cstat(id),nr=LV[lvOf(S.career[id])+1],v=r?{re
       // The rating is shared with the salesperson; the recommendation, MD decision and reason stay in the private table.
       const rid=r?.id||cuid(),c=S.career[id],x={id:rid,quarter:d.quarter.trim(),date:d.date,rating:d.rating,risk:r?!!r.risk:crisk(id)};
       await ddoc(rid).set({kind:'review',staff:id,rec:d.rec,md:d.md,reason:d.reason.trim()});
-      await cdoc(id).set({...c,reviews:r?(c.reviews||[]).map(o=>o.id===rid?x:o):[x,...(c.reviews||[])]})},
+      const qv=!r&&c.qrev&&c.qrev.date<=d.date?c.qrev:null;
+      await cdoc(id).set({...c,...(qv?{qrev:null}:{}),reviews:r?(c.reviews||[]).map(o=>o.id===rid?x:o):[x,...(c.reviews||[])]});
+      if(qv?.vid&&S.visits.some(v=>v.id===qv.vid))await DB.collection('visits').doc(qv.vid).update({status:'Done',outcome:'Quarterly review recorded in the career page.'})},
     r?async()=>{const c=S.career[id];if(S.dec[r.id])await ddoc(r.id).delete();return cdoc(id).set({...c,reviews:(c.reviews||[]).filter(o=>o.id!==r.id)})}:null)}
 function levelForm(i){const C=cs(),T=C.kpi[i],v={training:C.training[i].join('\n'),rmin:C.range[i][0],rmax:C.range[i][1]};Object.entries(T).forEach(([k,t])=>v['t_'+k]=t);
   modal('Settings: '+LV[i],[...Object.keys(T).map(k=>({k:'t_'+k,l:'Target: '+(MET[k]?.l||k),t:'number'})),{k:'rmin',l:'Expected months at this level: from',t:'number'},{k:'rmax',l:'to',t:'number'},{k:'training',l:'Training modules, one per line (renaming a module resets its status for everyone)',t:'area'}],v,
@@ -641,7 +655,7 @@ function levelForm(i){const C=cs(),T=C.kpi[i],v={training:C.training[i].join('\n
       x.kpi[i]=Object.fromEntries(Object.keys(T).map(k=>[k,Number(d['t_'+k])||0]));x.training[i]=d.training.split('\n').map(s=>s.trim()).filter(Boolean);x.range[i]=[Number(d.rmin)||0,Number(d.rmax)||0];
       if(!x.training[i].length)throw Error('Add at least one training module.');await DB.collection('career_settings').doc('main').set(x)})}
 async function csave(id,f){const c=S.career[id];if(!c)return;try{await cdoc(id).set(f(c))}catch(x){alert('Could not save: '+(x.message||x))}}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-ck],[data-cn],[data-crv],[data-cset],[data-cadd],[data-clv],[data-cprint],[data-cbook],[data-cpromo],[data-cdec]');if(!t||!my())return;const d=t.dataset;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-ck],[data-cn],[data-crv],[data-cset],[data-cadd],[data-clv],[data-cprint],[data-cbook],[data-cpromo],[data-cdec],[data-cqrev]');if(!t||!my())return;const d=t.dataset;
   if(d.cr!==undefined){S.cp=d.cr||null;S.tab='cr';render();scrollTo(0,0)}
   else if(d.ck)drill(d.ck);
   else if(d.cprint!==undefined)print();
@@ -649,6 +663,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-
   else if(d.cn)noteForm(S.cp,d.cn==='new'?null:(S.career[S.cp]?.notes||[]).find(n=>n.id===d.cn));
   else if(d.crv)reviewForm(S.cp,d.crv==='new'?null:(S.career[S.cp]?.reviews||[]).find(r=>r.id===d.crv));
   else if(d.cbook)checkinForm(d.cbook);
+  else if(d.cqrev)qrevForm(d.cqrev);
   else if(d.cpromo)promoForm(S.cp);
   else if(d.cdec)decideForm(S.cp,d.cdec);
   else if(d.cset||d.cadd)setupForm(d.cset||d.cadd);
