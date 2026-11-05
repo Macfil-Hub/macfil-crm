@@ -543,25 +543,33 @@ function histPanel(c,mg,id){const H=[...(c.history||[])].sort((a,b)=>a.effective
     :{d:p.decDate||p.date,t:'Not approved: '+LV[p.to],s:`declined by ${p.decBy}: ${p.decReason}`,c:'no'}));
   ev.sort((a,b)=>(a.d||'')<(b.d||'')?-1:1);
   return `<div class="pn"><h2>Career history<small>${mg&&S.decOK&&lvOf(c)<LV.length-1&&!pendingPromo(id)?'<button class="lnk" data-cpromo="1">+ Recommend promotion</button>':''}</small></h2>${mg&&!S.decOK?'<p class="cnt">Promotion and review decisions need setup_career_private.sql to be run once in Supabase.</p>':''}<div class="tml">${ev.map(e=>`<div class="te ${e.c||''}"${e.pid&&mg&&canDecide()?` data-cdec="${e.pid}"`:''}><b>${E(e.t)}</b><small class="cnt">${fd(e.d)}${e.s?' · '+E(e.s):''}</small>${e.pid&&mg&&canDecide()?'<br><span class="lnk">Record MD decision</span>':''}</div>`).join('')}</div></div>`}
+// "Cancel booking" button for the check-in and quarterly review forms: removes the booking and its Calendar entry.
+function unbook(fm,id,k,what){if(!(S.career[id][k]?.date>=ld()))return;
+  const bt=document.createElement('button');bt.type='button';bt.className='danger';bt.textContent='Cancel booking';fm.querySelector('.btns').prepend(bt);
+  bt.onclick=async()=>{if(!confirm(`Cancel this ${what}? It is also removed from the Calendar.`))return;
+    try{const vid=S.career[id][k].vid;if(vid&&S.visits.some(x=>x.id===vid))await DB.collection('visits').doc(vid).delete();
+      const c={...S.career[id]};delete c[k];await cdoc(id).set(c);$('#modal').hidden=true}catch(x){alert('Could not cancel: '+(x.message||x))}}}
 // Quarterly review date, set by the manager; stored on the career record and put in the manager's Calendar.
 function qrevForm(id){const c=S.career[id],p=S.staff[id],b=c.qrev&&c.qrev.date>=ld()?c.qrev:null;
   const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:qend(ld()),time:'10:00',remind:'1440',notes:''};
-  modal((b?'Change quarterly review: ':'Set quarterly review: ')+E(p.name),[{k:'date',l:'Review date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Notes (optional)',t:'area'}],v,
+  const fm=modal((b?'Change quarterly review: ':'Set quarterly review: ')+E(p.name),[{k:'date',l:'Review date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Notes (optional)',t:'area'}],v,
     async d=>{if(!d.date||!d.time)throw Error('Set a date and a time.');if(d.date<ld())throw Error('Pick today or a later date.');
       const V=DB.collection('visits'),old=b?.vid&&S.visits.some(x=>x.id===b.vid),vid=old?b.vid:'v'+Date.now().toString(36);
       const a={type:'Check-in',purpose:`Quarterly review (${qof(d.date)}): ${p.name}`,customer:'',date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),status:'Planned',owner:my().ini,careerOf:id};
       if(old)await V.doc(vid).update(a);else await V.doc(vid).set({...a,by:UID});
       if(d.remind!=='')askNotify();
-      await cdoc(id).set({...S.career[id],qrev:{date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),by:my().ini,vid}})})}
+      await cdoc(id).set({...S.career[id],qrev:{date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),by:my().ini,vid}})});
+  unbook(fm,id,'qrev','quarterly review')}
 function checkinForm(id){const c=S.career[id],p=S.staff[id],b=booked(c),ck=nextCk(c);
   const v=b?{date:b.date,time:b.time||'10:00',remind:b.remind??'1440',notes:b.notes||''}:{date:ck.d&&ck.d>ld()?ck.d:dplus(ld(),3),time:'10:00',remind:'1440',notes:CKAGENDA};
-  modal((b?'Change check-in: ':'Book check-in: ')+E(p.name),[{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Agenda (optional)',t:'area'}],v,
+  const fm=modal((b?'Change check-in: ':'Book check-in: ')+E(p.name),[{k:'date',l:'Date',t:'date'},{k:'time',l:'Time',t:'time'},{k:'remind',l:'Reminder alert',t:'select',o:REM},{k:'notes',l:'Agenda (optional)',t:'area'}],v,
     async d=>{if(!d.date||!d.time)throw Error('Set a date and a time.');if(d.date<ld())throw Error('Pick today or a later date.');
       const V=DB.collection('visits'),old=b?.vid&&S.visits.some(x=>x.id===b.vid),vid=old?b.vid:'v'+Date.now().toString(36);
       const a={type:'Check-in',purpose:'Career check-in: '+p.name,customer:'',date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),status:'Planned',owner:my().ini,careerOf:id};
       if(old)await V.doc(vid).update(a);else await V.doc(vid).set({...a,by:UID});
       if(d.remind!=='')askNotify();
-      await cdoc(id).set({...S.career[id],checkin:{date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),by:my().ini,vid}})})}
+      await cdoc(id).set({...S.career[id],checkin:{date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),by:my().ini,vid}})});
+  unbook(fm,id,'checkin','check-in')}
 function steps(id){const c=S.career[id],ini=S.staff[id]?.ini,rows=kRows(id),need=Math.ceil(rows.length*.75),miss=rows.filter(r=>r.v<r.t),o=[];
   if(rows.length-miss.length<need){const n=need-(rows.length-miss.length);o.push(`Meet ${n} more KPI target${n>1?'s':''} (closest: ${[...miss].sort((a,b)=>b.v/(b.t||1)-a.v/(a.t||1)).slice(0,n+1).map(r=>r.l).join(', ')})`)}
   const cv=miss.find(r=>r.k==='conv');
