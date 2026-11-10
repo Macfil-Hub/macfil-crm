@@ -149,7 +149,7 @@ const LOSTST=['Closed','Lost','Declined'];
 const LOSTR=['Price','Technical scope','Slow response','Delivery time','Competitor brand','Customer cancelled','Other'];
 const LOSTHINT={'Price':'Negotiation and pricing coaching; check margin before quoting','Technical scope':'Product training: Motor fundamentals, Motor servicing, Pump & mixer basics','Slow response':'Sales activities practices: quote and follow up faster','Delivery time':'Check stock and supplier lead times at enquiry stage','Competitor brand':'Product comparison and value selling','Customer cancelled':'Outside our control; keep in touch for the next project','Other':'Read the reason details on each quote','Not recorded':'Record a reason whenever a quote is Lost, Declined or Closed'};
 // Totals keep RM and USD apart instead of adding them together.
-const money=l=>{const t=c=>l.filter(q=>(q.curr||'RM').trim()===c).reduce((a,q)=>a+(q.price||0),0),u=t('USD');return 'RM '+fmt(t('RM'))+(u?' + USD '+fmt(u):'')};
+const money=l=>{const t=c=>l.filter(q=>(q.curr||'RM').trim()===c).reduce((a,q)=>a+(q.price||0),0),u=t('USD'),r=t('RM');return (r||!u?'RM '+fmt(r):'')+(u?(r?' + ':'')+'USD '+fmt(u):'')};
 const ORD=['','Order placed','Delivered','Invoiced','Paid'];
 const RL={manager:'Manager',finance:'Finance',support:'Sales support',sales:'Sales'};
 const S={tab:'fu',staff:{},quotes:[],custs:[],visits:[],vs:'up',scope:'mine',q:'',fl:{status:'',owner:'',product:''},sort:{k:'seq',d:-1},career:{},cset:null,cOK:false,cp:null,dec:{},decOK:false};
@@ -350,7 +350,7 @@ function modal(title,F,v,save,del){
   const el=$('#modal');el.hidden=false;
   // Photos: two pickers, because some phones open only the camera for a single image picker.
   const pk=f=>`<div class="lb">${f.l}<div class="pk"><label class="sb">Take photo<input type="file" accept="image/*" capture="environment"></label><label class="sb">Choose from gallery or files<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif"></label></div><div class="pv"></div></div>`;
-  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>f.t==='file'?pk(f):`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.dl?` list="${f.dl===1?'cl':f.dl}"`:''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><datalist id="brl">${BRANDS.map(b=>`<option value="${b}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
+  el.innerHTML=`<form><h3>${title}</h3>${F.map(f=>f.t==='file'?pk(f):`<label>${f.l}${f.t==='select'?`<select name="${f.k}">${f.o.map(o=>{const[a,b]=Array.isArray(o)?o:[o,o];return `<option value="${E(a)}"${a==(v[f.k]??'')?' selected':''}>${E(b)}</option>`}).join('')}</select>`:f.t==='area'?`<textarea name="${f.k}">${E(v[f.k])}</textarea>`:`<input name="${f.k}" type="${f.t||'text'}" value="${E(v[f.k])}"${f.step?` step="${f.step}"`:''}${f.dl?` list="${f.dl===1?'cl':f.dl}"`:''}${f.ro?' readonly':''}>`}${f.k==='find'?'<div class="res" id="res"></div>':''}</label>`).join('')}<datalist id="cl">${S.custs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><datalist id="brl">${BRANDS.map(b=>`<option value="${b}">`).join('')}</datalist><div class="btns"><button type="button" id="x">Cancel</button>${del?'<button type="button" id="del" class="danger">Delete</button>':''}<button class="pri">Save</button></div></form>`;
   const fm=el.firstChild;
   // Chosen photos collect in fm.ph (camera shots add up one by one); thumbnails can be removed before saving.
   fm.ph=[];const pv=fm.querySelector('.pv');
@@ -449,7 +449,10 @@ const fyq=d=>{const y=d.getMonth()>=3?d.getFullYear():d.getFullYear()-1;return{y
 const qof=s=>{const{y,q}=fyq(pd(s));return `FY${String(y).slice(2)}/${String(y+1).slice(2)} Q${q}`};
 const qend=s=>{const d=pd(s);return ld(new Date(d.getFullYear(),Math.floor(d.getMonth()/3)*3+3,0))};
 const cuid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-function cs(){const x=S.cset||{},o={kpi:{},training:{},range:{}};LV.forEach((_,i)=>{o.kpi[i]=x.kpi?.[i]||CDEF.kpi[i];o.training[i]=x.training?.[i]||CDEF.training[i];o.range[i]=x.range?.[i]||CDEF.range[i]});return o}
+function cs(){const x=S.cset||{},o={kpi:{},training:{},range:{},usd:Number(x.usd)||4.2};LV.forEach((_,i)=>{o.kpi[i]=x.kpi?.[i]||CDEF.kpi[i];o.training[i]=x.training?.[i]||CDEF.training[i];o.range[i]=x.range?.[i]||CDEF.range[i]});return o}
+// Won-value KPIs are in RM; a USD quote counts at the exchange rate under Programme settings.
+const rmv=q=>(q.price||0)*((q.curr||'RM').trim()==='USD'?cs().usd:1);
+const usdNote=l=>l.some(q=>(q.curr||'').trim()==='USD')?` (USD quotes counted at RM ${cs().usd} per USD)`:'';
 const lvOf=c=>Math.min(LV.length-1,Math.max(0,Number(c.level)||0));
 const mir=c=>{const s=pd(c.start);if(!s)return 0;const t=new Date();let m=(t.getFullYear()-s.getFullYear())*12+t.getMonth()-s.getMonth();if(t.getDate()<s.getDate())m--;return Math.max(0,m)};
 const rangeOf=c=>c.range||cs().range[lvOf(c)];
@@ -461,15 +464,15 @@ function crmKpi(ini,k,off=0){
   const t=new Date(),mine=S.quotes.filter(q=>q.sales===ini||q.ae===ini),dec=q=>win(q)||['Lost','Declined'].includes(oc(q)),wd=q=>q.won||q.date||'';
   const mS=ld(new Date(t.getFullYear(),t.getMonth()-off,1)),mE=ld(new Date(t.getFullYear(),t.getMonth()-off+1,0)),inM=s=>!!s&&s>=mS&&s<=mE;
   if(k==='quotes'){const l=mine.filter(q=>inM(q.date));return{v:l.length,q:l,w:'Quotes dated this month where you are Sales or AE'}}
-  if(k==='value'){const l=mine.filter(q=>win(q)&&inM(wd(q)));return{v:l.reduce((a,q)=>a+(q.price||0),0),q:l,w:'Quotes marked Win this month'}}
+  if(k==='value'){const l=mine.filter(q=>win(q)&&inM(wd(q)));return{v:l.reduce((a,q)=>a+rmv(q),0),q:l,w:'Quotes marked Win this month'+usdNote(l)}}
   if(k==='conv'){const to=ld(new Date(t.getFullYear(),t.getMonth(),t.getDate()-30*off)),fr=dplus(to,-90),l=mine.filter(q=>q.date>=fr&&q.date<=to&&dec(q)),w=l.filter(win).length;
     return{v:l.length?Math.round(w/l.length*100):0,q:l,won:w,dec:l.length,w:`${w} won out of ${l.length} decided quotes (won, lost or declined) dated in the last 90 days`}}
   if(k==='accounts'){const m0=Math.floor(t.getMonth()/3)*3-3*off,a=ld(new Date(t.getFullYear(),m0,1)),b=ld(new Date(t.getFullYear(),m0+3,0));
     const l=S.custs.filter(c=>{const d=custDate(c);return d>=a&&d<=b}).map(c=>S.quotes.filter(q=>q.customer===c.name).sort((x,y)=>x.seq-y.seq)[0]).filter(q=>q&&(q.sales===ini||q.ae===ini));
     return{v:l.length,q:l,w:'Customers added to the CRM this quarter whose first quote is yours'}}
   if(k==='repeat'){const to=dplus(ld(),-30*off),fr=dplus(to,-365),l=mine.filter(q=>win(q)&&wd(q)>=fr&&wd(q)<=to);
-    const rep=l.filter(q=>S.quotes.some(o=>o.id!==q.id&&o.customer===q.customer&&win(o)&&wd(o)<wd(q))),tot=l.reduce((a,q)=>a+(q.price||0),0);
-    return{v:tot?Math.round(rep.reduce((a,q)=>a+(q.price||0),0)/tot*100):0,q:rep,w:'Won value from customers who had ordered before, over the last 12 months'}}
+    const rep=l.filter(q=>S.quotes.some(o=>o.id!==q.id&&o.customer===q.customer&&win(o)&&wd(o)<wd(q))),tot=l.reduce((a,q)=>a+rmv(q),0);
+    return{v:tot?Math.round(rep.reduce((a,q)=>a+rmv(q),0)/tot*100):0,q:rep,w:'Won value from customers who had ordered before, over the last 12 months'+usdNote(l)}}
   if(k==='visits'){const l=S.visits.filter(v=>v.owner===ini&&v.status==='Done'&&inM(v.date));return{v:l.length,a:l,w:'Activities marked Done this month'}}
   return{v:0,q:[],w:''}}
 function kRows(id){const c=S.career[id],ini=S.staff[id]?.ini||'',T=cs().kpi[lvOf(c)];
@@ -486,7 +489,9 @@ const crisk=id=>{const c=S.career[id];return mir(c)>rangeOf(c)[1]&&!recent(c)};
 // A booked check-in lives on the career record (so the salesperson sees it) and as a Check-in activity in the manager's calendar.
 const booked=c=>c.checkin&&c.checkin.date>=ld()?c.checkin:null;
 const nextCk=c=>{const b=booked(c),lr=lastRev(c);return b?{d:b.date,t:b.time,by:b.by,bk:true}:{d:lr?dplus(lr,30):null,bk:false}};
-const ckTxt=ck=>ck.bk?fd(ck.d)+(ck.t?' '+ck.t:''):ck.d?fd(ck.d)+' (not booked)':'Not booked';
+const ckTxt=ck=>ck.bk?fd(ck.d)+(ck.t?' '+ck.t:''):ck.d?(dsince(ck.d)>0?'Overdue since '+fd(ck.d):fd(ck.d)+' (not booked)'):'Not booked';
+// A booked check-in or quarterly review with an agenda: shown to the manager and the salesperson, so both can prepare.
+const bookPanel=(t,b)=>b&&b.notes?`<div class="pn"><b>${t} on ${fd(b.date)}${b.time?' at '+b.time:''}${b.by?' with '+E(b.by):''}</b> · agenda<br><small class="cnt" style="white-space:pre-line">${E(b.notes)}</small></div>`:'';
 // Why deals were lost: Closed, Lost and Declined quotes dated in the last 90 days, grouped by reason.
 function lostPanel(l,title){const fr=dplus(ld(),-90),x=l.filter(q=>LOSTST.includes(st(q))&&(q.date||'')>=fr),g={};
   x.forEach(q=>{const k=q.why||'Not recorded';(g[k]=g[k]||[]).push(q)});const rows=Object.entries(g).sort((a,b)=>b[1].length-a[1].length),mx=rows[0]?.[1].length||1;
@@ -571,11 +576,11 @@ function checkinForm(id){const c=S.career[id],p=S.staff[id],b=booked(c),ck=nextC
       await cdoc(id).set({...S.career[id],checkin:{date:d.date,time:d.time,remind:d.remind,notes:d.notes.trim(),by:my().ini,vid}})});
   unbook(fm,id,'checkin','check-in')}
 function steps(id){const c=S.career[id],ini=S.staff[id]?.ini,rows=kRows(id),need=Math.ceil(rows.length*.75),miss=rows.filter(r=>r.v<r.t),o=[];
-  if(rows.length-miss.length<need){const n=need-(rows.length-miss.length);o.push(`Meet ${n} more KPI target${n>1?'s':''} (closest: ${[...miss].sort((a,b)=>b.v/(b.t||1)-a.v/(a.t||1)).slice(0,n+1).map(r=>r.l).join(', ')})`)}
+  if(rows.length-miss.length<need){const n=need-(rows.length-miss.length);o.push(`Meet ${n} more KPI target${n>1?'s':''} (closest: ${[...miss].sort((a,b)=>b.v/(b.t||1)-a.v/(a.t||1)).slice(0,n).map(r=>r.l).join(', ')})`)}
   const cv=miss.find(r=>r.k==='conv');
   if(cv&&cv.t<100){const T=cv.t/100,x=Math.max(1,Math.ceil((T*cv.r.dec-cv.r.won)/(1-T))),op=S.quotes.filter(q=>(q.sales===ini||q.ae===ini)&&pre(q)).length;o.push(`To lift conversion to ${cv.t}%: win about ${x} more quote${x>1?'s':''} (${op} open now)`)}
   const op=tRows(id).filter(t=>t.s!=='done');if(op.length)o.push('Pass the assessment for: '+op.map(t=>t.n).join(', '));
-  if(!recent(c))o.push('Book a manager review conversation');return o}
+  if(!recent(c))o.push(isMgr()?'Book a manager review conversation':'A review conversation with your manager (none in the last 92 days)');return o}
 
 function careerStrip(){const c=S.career[UID];if(!c)return'';const st=cstat(UID),r=kRows(UID),lr=lastRev(c);
   return `<div class="pn hi"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>My progress: <span class="r-${st}">${RD[st]}</span></b><button class="lnk" data-t="cr">Open My progress →</button></div><small class="cnt">${r.filter(x=>x.v>=x.t).length} of ${r.length} KPI targets met · next check-in ${ckTxt(nextCk(c))}</small></div>`}
@@ -597,10 +602,11 @@ function pv(id){
   const acts=(c.notes||[]).filter(n=>n.action&&!n.done),late=acts.filter(n=>n.due&&dsince(n.due)>0).length,notes=[...(c.notes||[])].sort((a,b)=>a.date<b.date?1:-1),revs=[...(c.reviews||[])].sort((a,b)=>a.date<b.date?1:-1),rg=rangeOf(c);
   return `${mg?'<p style="margin:0 0 8px"><button class="lnk" data-cr="">← All staff</button></p>':''}
   <div class="hd"><div><h2>${E(p.name)}</h2><small class="cnt">${LV[lv]} · ${mir(c)} months in role (since ${fd(c.start)})${nr?' · working toward '+nr:''}</small></div><div class="acts"><span class="bdg r-${st}">${RD[st]}</span>${rk?'<span class="bdg r-risk">At risk</span>':''}<button class="sb" data-cprint>Print</button>${mg?`<button class="sb" data-cbook="${id}">${ck.bk?'Change check-in':'Book check-in'}</button><button class="sb" data-cqrev="${id}">${qr?'Change quarterly review':'Set quarterly review'}</button><button class="sb" data-cset="${id}">Edit setup</button>`:''}</div></div>
-  <div class="kpi"><div><b>${lr?fd(lr):'None'}</b><small>Last manager review</small></div><div class="${nxl?'late':''}"><b>${ck.d?fd(ck.d)+(ck.bk&&ck.t?' '+ck.t:''):'Not booked'}</b><small>${ck.bk?'Check-in booked'+(ck.by?' with '+E(ck.by):''):'Next monthly check-in'+(ck.d?(nxl?' (overdue, not booked)':' (not booked)'):'')}</small></div><div class="${qr?'':'late'}"><b>${qr?fd(qr.date)+(qr.time?' '+qr.time:''):'Not set'}</b><small>${qr?qof(qr.date)+' quarterly review'+(qr.by?' with '+E(qr.by):''):qof(ld())+' quarterly review: date not set'}</small></div><div class="${late?'late':''}"><b>${acts.length}</b><small>Open development actions${late?`, ${late} overdue`:''}</small></div></div>
+  <div class="kpi"><div><b>${lr?fd(lr):'None'}</b><small>Last manager review</small></div><div class="${nxl?'late':''}"><b>${ck.d?fd(ck.d)+(ck.bk&&ck.t?' '+ck.t:''):'Not booked'}</b><small>${ck.bk?'Check-in booked'+(ck.by?' with '+E(ck.by):''):'Next monthly check-in'+(ck.d?(nxl?' (overdue, not booked)':' (not booked)'):'')}</small></div><div class="${qr||!mg?'':'late'}"><b>${qr?fd(qr.date)+(qr.time?' '+qr.time:''):'Not set'}</b><small>${qr?qof(qr.date)+' quarterly review'+(qr.by?' with '+E(qr.by):''):qof(ld())+' quarterly review: date not set'}</small></div><div class="${late?'late':''}"><b>${acts.length}</b><small>Open development actions${late?`, ${late} overdue`:''}</small></div></div>
   ${rk?`<div class="pn warn"><b class="r-risk">At risk:</b> ${mir(c)} months in role (expected ${rg[0]}–${rg[1]}) and no manager review in the last 92 days.<br><small class="cnt">The Sales Director holds a growth-path conversation before the next monthly check-in.</small></div>`:''}
-  ${mg&&pendingPromo(id)?(r=>`<div class="pn hi"><b>Promotion to ${LV[r.to]} recommended</b> by ${E(r.by)} on ${fd(r.date)}, waiting for the MD decision.${canDecide()?` <button class="lnk" data-cdec="${r.id}">Record MD decision</button>`:''}</div>`)(pendingPromo(id)):''}
-  ${dir<=60?onb(c,mg,dir):''}
+  ${mg&&pendingPromo(id)?(r=>`<div class="pn hi"><b>Promotion to ${LV[r.to]} recommended</b> by ${E(r.by)} on ${fd(r.date)}, waiting for the MD decision.${canDecide()?` <button class="lnk" data-cdec="${r.id}">Record MD decision</button>`:''} <button class="lnk" data-cwd="${r.id}">Withdraw</button></div>`)(pendingPromo(id)):''}
+  ${bookPanel('Check-in',booked(c))}${bookPanel('Quarterly review',qr)}
+  ${dir<=60||(c.onb&&Object.values(c.onb).some(Boolean)&&ONB.some(([k])=>!c.onb[k]))?onb(c,mg,dir):''}
   <div class="g2"><div class="pn hi"><h2>Promotion readiness<small>${RD[st]}</small></h2>
     <div class="ck ${h>=.75?'ok':''}"><b>${h>=.75?'✓':'–'}</b>KPI targets met: ${Math.round(h*100)}% (needs 75%)</div>
     <div class="ck ${tn===1?'ok':''}"><b>${tn===1?'✓':'–'}</b>Training complete: ${Math.round(tn*100)}% (needs 100%)</div>
@@ -625,7 +631,9 @@ function tv(){
   <h2>Programme roster<small>${R.length} staff</small></h2>${R.length?`<div class="tw"><table><thead><tr><th>Name</th><th>Level</th><th>Months</th><th>Quotes (mo)</th><th>Conv. 90d</th><th>Won RM (mo)</th><th>KPIs met</th><th>Training</th><th>Readiness</th><th>Next check-in</th></tr></thead><tbody>${R.map(r=>`<tr data-cr="${r.id}"><td>${E(r.p.name)}</td><td>${LV[lvOf(r.c)]}</td><td class="${mir(r.c)>rangeOf(r.c)[1]?'late':''}">${mir(r.c)}</td><td>${K(r,'quotes')}</td><td>${K(r,'conv')}%</td><td>${fmt(K(r,'value'))}</td><td>${Math.round(r.h*100)}%</td><td>${Math.round(r.tn*100)}%</td><td><span class="r-${r.st}">${RD[r.st]}</span>${r.rk?' <span class="r-risk">· at risk</span>':''}</td><td class="${due(r)?'late':''}">${ckTxt(nextCk(r.c))}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Nobody is in the programme yet. Add staff below.</p>'}
   ${lostPanel(visible(),'Why deals were lost · all quotes')}
   ${out.length?`<h2>Not in the programme yet<small>${out.length}</small></h2>${out.map(([id,s])=>`<div class="row" data-cadd="${id}"><div class="l"><b>${E(s.name)}${s.ini?' ('+E(s.ini)+')':''}</b><span class="lnk">Add</span></div><small>${RL[s.role]||s.role}</small></div>`).join('')}`:''}
-  <h2>Programme settings<small>targets and training per level</small></h2><div class="pn">${LV.map((l,i)=>`<div class="tr"><span>${l}<br><small>${Object.entries(cs().kpi[i]).map(([k,t])=>`${MET[k]?.l||k}: ${fmt(t)}${MET[k]?.u||''}`).join(' · ')}</small></span><button class="sb" data-clv="${i}">Edit</button></div>`).join('')}</div>`}
+  <h2>Programme settings<small>targets and training per level</small></h2><div class="pn">${LV.map((l,i)=>`<div class="tr"><span>${l}<br><small>${Object.entries(cs().kpi[i]).map(([k,t])=>`${MET[k]?.l||k}: ${fmt(t)}${MET[k]?.u||''}`).join(' · ')}</small></span><button class="sb" data-clv="${i}">Edit</button></div>`).join('')}<div class="tr"><span>Exchange rate<br><small>USD quotes count as RM ${cs().usd} per USD in the won-value KPIs</small></span><button class="sb" data-crate="1">Edit</button></div></div>`}
+function rateForm(){modal('Exchange rate for KPIs',[{k:'usd',l:'RM per 1 USD',t:'number',step:'any'}],{usd:cs().usd},
+  async d=>{const r=Number(d.usd);if(!(r>0))throw Error('Enter a rate above 0.');await DB.collection('career_settings').doc('main').set({...(S.cset||{}),usd:r})})}
 
 function drill(k){const id=isMgr()?S.cp:UID,s=S.staff[id]||{},r=crmKpi(s.ini,k),m=MET[k];
   sheet(`<h3>${E(m.l)}</h3><p class="cnt">${E(s.name)} · ${fmt(r.v)}${m.u}<br>${E(r.w)}</p>${r.a?r.a.map(vrow).join('')||'<p class="empty">No activities in this period.</p>':[...r.q].sort((a,b)=>b.seq-a.seq).map(qrow).join('')||'<p class="empty">No quotes in this period.</p>'}`)}
@@ -663,7 +671,7 @@ function levelForm(i){const C=cs(),T=C.kpi[i],v={training:C.training[i].join('\n
       x.kpi[i]=Object.fromEntries(Object.keys(T).map(k=>[k,Number(d['t_'+k])||0]));x.training[i]=d.training.split('\n').map(s=>s.trim()).filter(Boolean);x.range[i]=[Number(d.rmin)||0,Number(d.rmax)||0];
       if(!x.training[i].length)throw Error('Add at least one training module.');await DB.collection('career_settings').doc('main').set(x)})}
 async function csave(id,f){const c=S.career[id];if(!c)return;try{await cdoc(id).set(f(c))}catch(x){alert('Could not save: '+(x.message||x))}}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-ck],[data-cn],[data-crv],[data-cset],[data-cadd],[data-clv],[data-cprint],[data-cbook],[data-cpromo],[data-cdec],[data-cqrev]');if(!t||!my())return;const d=t.dataset;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-ck],[data-cn],[data-crv],[data-cset],[data-cadd],[data-clv],[data-cprint],[data-cbook],[data-cpromo],[data-cdec],[data-cqrev],[data-cwd],[data-crate]');if(!t||!my())return;const d=t.dataset;
   if(d.cr!==undefined){S.cp=d.cr||null;S.tab='cr';render();scrollTo(0,0)}
   else if(d.ck)drill(d.ck);
   else if(d.cprint!==undefined)print();
@@ -674,6 +682,8 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-cr],[data-
   else if(d.cqrev)qrevForm(d.cqrev);
   else if(d.cpromo)promoForm(S.cp);
   else if(d.cdec)decideForm(S.cp,d.cdec);
+  else if(d.cwd){if(confirm('Withdraw this promotion recommendation?'))ddoc(d.cwd).delete().catch(x=>alert('Could not withdraw: '+(x.message||x)))}
+  else if(d.crate)rateForm();
   else if(d.cset||d.cadd)setupForm(d.cset||d.cadd);
   else if(d.clv)levelForm(Number(d.clv))});
 document.addEventListener('change',e=>{const d=e.target.dataset,id=S.cp;if(!(d.ct||d.ca||d.cob)||!my()||!isMgr()||!S.career[id])return;

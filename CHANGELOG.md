@@ -1,5 +1,11 @@
 # Macfil CRM: change log
 
+## 2026-11-10
+- Career: **USD quotes no longer count as RM** in the won-value KPIs (Orders won / month, repeat-customer value, the roster's Won RM column). They are converted at the exchange rate under Career > Programme settings (starts at RM 4.20 per USD; press Edit to change it).
+- Career: a booked check-in or quarterly review now shows its **agenda** on the person's page, for the manager and the salesperson.
+- Career: a manager can **withdraw** a promotion recommendation that is still waiting for the MD.
+- Career: an overdue check-in reads "Overdue since …" in the roster instead of a past date; the onboarding checklist stays visible after day 60 while steps are still open; small wording fixes on the salesperson's own page.
+
 ## 2026-11-05
 - Career: a booked **check-in** or **quarterly review** can now be cancelled. Open it (Change check-in / Change quarterly review) and press **Cancel booking**; the entry is also removed from the Calendar.
 
